@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "setup": "tsx scripts/setup-database.ts",
+    "build": "next build",
+    "postbuild": "npm run setup"
+  }
+}
