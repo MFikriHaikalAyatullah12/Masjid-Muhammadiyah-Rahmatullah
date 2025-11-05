@@ -22,13 +22,13 @@ export default function RootLayout({
       <body 
         className={`${inter.className} text-gray-900`}
         style={{
-          backgroundColor: '#90EE90'
+          backgroundColor: '#D4F4D4'
         }}
       >
         <div 
           className="min-h-screen"
           style={{
-            backgroundColor: '#90EE90'
+            backgroundColor: '#D4F4D4'
           }}
         >
           <Sidebar />

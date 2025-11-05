@@ -11,7 +11,6 @@ import {
   TrendingDown, 
   Users, 
   Building,
-  LogOut,
   FileText,
   Menu,
   X,
@@ -91,13 +90,6 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
-      
-      <div className="p-4">
-        <button className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors">
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          <span className="truncate">Keluar</span>
-        </button>
-      </div>
     </>
   );
 
