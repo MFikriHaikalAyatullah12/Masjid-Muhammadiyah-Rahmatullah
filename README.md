@@ -1,6 +1,6 @@
 # Sistem Manajemen Zakat Masjid
 
-Aplikasi web untuk mengelola zakat fitrah, zakat mal, kas harian, dan pengeluaran masjid dengan interface yang user-friendly dan perhitungan otomatis.
+Aplikasi web untuk mengelola zakat fitrah, zakat mal, kas harian, dan pengeluaran masjid dengan interface yang user-friendly dan perhitungan otomatis. **Update terbaru**: Desain minimalist dan fitur Donatur Bulanan serta Tabungan Qurban.
 
 ## 🚀 Fitur Utama
 
@@ -22,6 +22,21 @@ Aplikasi web untuk mengelola zakat fitrah, zakat mal, kas harian, dan pengeluara
 - Validasi nisab dan haul
 - Perhitungan zakat otomatis (2.5%)
 
+### 📅 Donatur Bulanan ✨ NEW
+- Kelola donatur yang menyumbang rutin setiap bulan
+- Auto reminder tanggal pembayaran
+- Histori pembayaran lengkap
+- Tracking status donatur (aktif/non-aktif)
+- Integrasi otomatis dengan kas harian
+
+### 🐑 Tabungan Qurban ✨ NEW
+- Sistem tabungan hewan qurban dengan cicilan
+- Support kambing, sapi, domba
+- Progress tracking visual dengan progress bar
+- Cicilan fleksibel kapan saja
+- Auto kalkulasi sisa kekurangan
+- Status otomatis (menabung → terpenuhi)
+
 ### 💵 Kas Harian
 - Tracking pemasukan dan pengeluaran harian
 - Kategori transaksi yang lengkap
@@ -39,6 +54,16 @@ Aplikasi web untuk mengelola zakat fitrah, zakat mal, kas harian, dan pengeluara
 - Kategorisasi sesuai 8 asnaf
 - Tracking distribusi zakat
 - Status aktif/non-aktif
+
+## 🎨 Desain Minimalist ✨ NEW
+
+Aplikasi telah didesain ulang dengan pendekatan minimalist:
+- Color palette yang lebih ringan dan modern
+- Border subtle tanpa shadow berat
+- Typography yang lebih clean
+- Card design dengan rounded corners
+- Hover effects yang smooth
+- Responsive untuk semua device
 
 ## 🛠️ Teknologi
 

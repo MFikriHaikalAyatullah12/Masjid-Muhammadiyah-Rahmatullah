@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
 
 interface AlertProps {
   type: 'success' | 'error' | 'warning' | 'info';
@@ -12,34 +12,34 @@ export default function Alert({ type, title, message, onClose }: AlertProps) {
   const config = {
     success: {
       icon: CheckCircle,
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      iconColor: 'text-green-600',
-      titleColor: 'text-green-800',
-      messageColor: 'text-green-700'
+      bgColor: 'bg-emerald-50',
+      borderColor: 'border-emerald-100',
+      iconColor: 'text-emerald-600',
+      titleColor: 'text-emerald-900',
+      messageColor: 'text-emerald-700'
     },
     error: {
       icon: XCircle,
       bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
+      borderColor: 'border-red-100',
       iconColor: 'text-red-600',
-      titleColor: 'text-red-800',
+      titleColor: 'text-red-900',
       messageColor: 'text-red-700'
     },
     warning: {
       icon: AlertCircle,
-      bgColor: 'bg-yellow-50',
-      borderColor: 'border-yellow-200',
-      iconColor: 'text-yellow-600',
-      titleColor: 'text-yellow-800',
-      messageColor: 'text-yellow-700'
+      bgColor: 'bg-orange-50',
+      borderColor: 'border-orange-100',
+      iconColor: 'text-orange-600',
+      titleColor: 'text-orange-900',
+      messageColor: 'text-orange-700'
     },
     info: {
       icon: Info,
       bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
+      borderColor: 'border-blue-100',
       iconColor: 'text-blue-600',
-      titleColor: 'text-blue-800',
+      titleColor: 'text-blue-900',
       messageColor: 'text-blue-700'
     }
   };
@@ -47,38 +47,31 @@ export default function Alert({ type, title, message, onClose }: AlertProps) {
   const { icon: Icon, bgColor, borderColor, iconColor, titleColor, messageColor } = config[type];
 
   return (
-    <div className={`rounded-md border p-4 ${bgColor} ${borderColor}`}>
-      <div className="flex">
+    <div className={`rounded-xl border p-4 ${bgColor} ${borderColor} shadow-sm`}>
+      <div className="flex items-start">
         <div className="flex-shrink-0">
           <Icon className={`h-5 w-5 ${iconColor}`} aria-hidden="true" />
         </div>
         <div className="ml-3 flex-1">
           {title && (
-            <h3 className={`text-sm font-medium ${titleColor}`}>
+            <h3 className={`text-sm font-semibold ${titleColor} mb-1`}>
               {title}
             </h3>
           )}
-          <div className={`text-sm ${title ? 'mt-1' : ''} ${messageColor}`}>
+          <div className={`text-sm ${messageColor}`}>
             <p>{message}</p>
           </div>
         </div>
         {onClose && (
           <div className="ml-auto pl-3">
-            <div className="-mx-1.5 -my-1.5">
-              <button
-                type="button"
-                onClick={onClose}
-                className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  type === 'success' ? 'text-green-500 hover:bg-green-100 focus:ring-green-600' :
-                  type === 'error' ? 'text-red-500 hover:bg-red-100 focus:ring-red-600' :
-                  type === 'warning' ? 'text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-600' :
-                  'text-blue-500 hover:bg-blue-100 focus:ring-blue-600'
-                }`}
-              >
-                <span className="sr-only">Tutup</span>
-                <XCircle className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className={`inline-flex rounded-lg p-1.5 hover:bg-white transition-colors ${iconColor}`}
+            >
+              <span className="sr-only">Tutup</span>
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
           </div>
         )}
       </div>

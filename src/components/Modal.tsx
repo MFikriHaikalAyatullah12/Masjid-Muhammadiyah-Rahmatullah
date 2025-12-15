@@ -24,25 +24,25 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
       <div className="flex min-h-screen items-center justify-center p-4">
         {/* Backdrop */}
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 bg-black bg-opacity-40 transition-opacity"
           onClick={onClose}
         ></div>
         
         {/* Modal */}
-        <div className={`relative bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden`}>
+        <div className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden`}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-5 border-b border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-1 transition-colors"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
           </div>
           
           {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+          <div className="p-5 overflow-y-auto max-h-[calc(90vh-80px)]">
             {children}
           </div>
         </div>

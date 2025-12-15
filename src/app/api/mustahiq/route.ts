@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/database';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const result = await pool.query('SELECT * FROM mustahiq ORDER BY nama ASC');
+    const user = await requireAuth();
+    const result = await pool.query(
+      'SELECT * FROM mustahiq WHERE user_id = $1 ORDER BY nama ASC',
+      [user.userId]
+    );
     
     const mustahiq = result.rows.map((row: any) => ({
       ...row,
@@ -12,7 +17,10 @@ export async function GET() {
     }));
     
     return NextResponse.json(mustahiq);
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error fetching mustahiq:', error);
     return NextResponse.json({ error: 'Failed to fetch mustahiq' }, { status: 500 });
   }
@@ -20,15 +28,19 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await requireAuth();
     const data = await request.json();
     
     const result = await pool.query(
-      'INSERT INTO mustahiq (nama, alamat, no_telepon, kategori, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) RETURNING *',
-      [data.nama, data.alamat, data.no_telepon || data.no_hp, data.kategori, data.status || 'aktif']
+      'INSERT INTO mustahiq (nama, alamat, no_telepon, kategori, status, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) RETURNING *',
+      [data.nama, data.alamat, data.no_telepon || data.no_hp, data.kategori, data.status || 'aktif', user.userId]
     );
     
     return NextResponse.json(result.rows[0], { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error creating mustahiq:', error);
     return NextResponse.json({ error: 'Failed to create mustahiq' }, { status: 500 });
   }

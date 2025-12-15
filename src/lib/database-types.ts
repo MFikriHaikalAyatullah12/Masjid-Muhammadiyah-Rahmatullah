@@ -69,3 +69,79 @@ export interface PengeluaranDB {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface DonaturBulananDB {
+  id: number;
+  nama: string;
+  alamat?: string;
+  no_telepon?: string;
+  email?: string;
+  jumlah_donasi: number;
+  tanggal_mulai: Date;
+  status: 'aktif' | 'non-aktif' | 'berhenti';
+  metode_pembayaran: string;
+  tanggal_pembayaran: number;
+  keterangan?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface PembayaranDonaturDB {
+  id: number;
+  donatur_id: number;
+  tanggal_bayar: Date;
+  bulan: number;
+  tahun: number;
+  jumlah: number;
+  metode_pembayaran: string;
+  status: 'lunas' | 'pending' | 'terlambat';
+  bukti_pembayaran?: string;
+  keterangan?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface TabunganQurbanDB {
+  id: number;
+  nama_penabung: string;
+  alamat?: string;
+  no_telepon?: string;
+  email?: string;
+  jenis_hewan: string;
+  target_tabungan: number;
+  total_terkumpul: number;
+  sisa_kekurangan: number;
+  tanggal_mulai: Date;
+  target_qurban_tahun: number;
+  status: 'menabung' | 'terpenuhi' | 'diambil' | 'dibatalkan';
+  keterangan?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface CicilanQurbanDB {
+  id: number;
+  tabungan_id: number;
+  tanggal_bayar: Date;
+  jumlah: number;
+  metode_pembayaran: string;
+  bukti_pembayaran?: string;
+  petugas: string;
+  keterangan?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface PengambilanQurbanDB {
+  id: number;
+  tabungan_id: number;
+  tanggal_pengambilan: Date;
+  jenis_hewan: string;
+  jumlah_hewan: number;
+  harga_hewan: number;
+  supplier?: string;
+  keterangan?: string;
+  petugas: string;
+  created_at: Date;
+  updated_at: Date;
+}

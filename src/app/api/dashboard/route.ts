@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getDashboardStats } from '@/lib/database';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET() {
   try {
-    console.log('Fetching dashboard stats...');
-    const stats = await getDashboardStats();
+    const user = await requireAuth();
+    console.log('Fetching dashboard stats for user:', user.userId);
+    const stats = await getDashboardStats(user.userId);
     console.log('Dashboard stats fetched successfully:', stats);
     
     return NextResponse.json(stats, {

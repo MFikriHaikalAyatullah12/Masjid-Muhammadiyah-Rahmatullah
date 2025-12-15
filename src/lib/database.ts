@@ -281,7 +281,7 @@ export async function createDistribusiZakat(data: Omit<DistribusiZakat, 'id'>): 
 }
 
 // Dashboard statistics
-export async function getDashboardStats() {
+export async function getDashboardStats(userId: number) {
   let client;
   let retryCount = 0;
   const maxRetries = 3;
@@ -290,7 +290,7 @@ export async function getDashboardStats() {
     try {
       client = await pool.connect();
       
-      // Get stats with safer queries
+      // Get stats with safer queries filtered by user_id
       const [
         totalZakatFitrahResult,
         totalZakatMalResult,
@@ -298,11 +298,11 @@ export async function getDashboardStats() {
         currentSaldoResult,
         recentTransactionsResult
       ] = await Promise.all([
-        client.query('SELECT COUNT(*) as count, COALESCE(SUM(total_rupiah), 0) as total FROM zakat_fitrah WHERE EXTRACT(YEAR FROM tanggal_bayar) = EXTRACT(YEAR FROM CURRENT_DATE)'),
-        client.query('SELECT COUNT(*) as count, COALESCE(SUM(jumlah_zakat), 0) as total FROM zakat_mal WHERE EXTRACT(YEAR FROM tanggal_bayar) = EXTRACT(YEAR FROM CURRENT_DATE)'),
-        client.query('SELECT COUNT(*) as count, COALESCE(SUM(jumlah), 0) as total FROM pengeluaran WHERE EXTRACT(YEAR FROM tanggal) = EXTRACT(YEAR FROM CURRENT_DATE)'),
-        client.query('SELECT saldo_sesudah FROM kas_harian ORDER BY tanggal DESC, created_at DESC LIMIT 1'),
-        client.query('SELECT * FROM kas_harian ORDER BY tanggal DESC, created_at DESC LIMIT 10')
+        client.query('SELECT COUNT(*) as count, COALESCE(SUM(total_rupiah), 0) as total FROM zakat_fitrah WHERE user_id = $1 AND EXTRACT(YEAR FROM tanggal_bayar) = EXTRACT(YEAR FROM CURRENT_DATE)', [userId]),
+        client.query('SELECT COUNT(*) as count, COALESCE(SUM(jumlah_zakat), 0) as total FROM zakat_mal WHERE user_id = $1 AND EXTRACT(YEAR FROM tanggal_bayar) = EXTRACT(YEAR FROM CURRENT_DATE)', [userId]),
+        client.query('SELECT COUNT(*) as count, COALESCE(SUM(jumlah), 0) as total FROM pengeluaran WHERE user_id = $1 AND EXTRACT(YEAR FROM tanggal) = EXTRACT(YEAR FROM CURRENT_DATE)', [userId]),
+        client.query('SELECT saldo_sesudah FROM kas_harian WHERE user_id = $1 ORDER BY tanggal DESC, created_at DESC LIMIT 1', [userId]),
+        client.query('SELECT * FROM kas_harian WHERE user_id = $1 ORDER BY tanggal DESC, created_at DESC LIMIT 10', [userId])
       ]);
 
       // Get distribusi_zakat data

@@ -101,7 +101,7 @@ export default function Dashboard() {
             {/* Title and Description */}
             <div className="text-center md:text-left flex-grow">
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                Masjid Muhammadiyah Rahmatullah
+                Sistem Administrasi Masjid
               </h1>
               <p className="text-sm md:text-base text-gray-600">
                 Selamat datang di sistem manajemen zakat dan keuangan masjid
