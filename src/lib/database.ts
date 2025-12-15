@@ -5,11 +5,19 @@ import type { User, UserFromDB, ZakatFitrah, ZakatMal, KasHarian, Pengeluaran, M
 // Export pool for direct access
 export { default as pool } from './db';
 
-// Helper function untuk mendapatkan saldo kas terkini
-export async function getCurrentSaldo(): Promise<number> {
-  const result = await pool.query(
-    'SELECT saldo_sesudah FROM kas_harian ORDER BY tanggal DESC, created_at DESC LIMIT 1'
-  );
+// Helper function untuk mendapatkan saldo kas terkini per user
+export async function getCurrentSaldo(userId?: number): Promise<number> {
+  let query = 'SELECT saldo_sesudah FROM kas_harian';
+  const params: any[] = [];
+  
+  if (userId) {
+    query += ' WHERE user_id = $1';
+    params.push(userId);
+  }
+  
+  query += ' ORDER BY tanggal DESC, created_at DESC LIMIT 1';
+  
+  const result = await pool.query(query, params);
   return result.rows.length > 0 ? parseFloat(result.rows[0].saldo_sesudah) : 0;
 }
 
@@ -165,8 +173,8 @@ export async function getAllKasHarian(): Promise<KasHarian[]> {
   }));
 }
 
-export async function createKasHarian(data: Omit<KasHarian, 'id' | 'saldo_sebelum' | 'saldo_sesudah'>): Promise<KasHarian> {
-  const currentSaldo = await getCurrentSaldo();
+export async function createKasHarian(data: any, userId: number): Promise<KasHarian> {
+  const currentSaldo = await getCurrentSaldo(userId);
   let newSaldo = currentSaldo;
   
   if (data.jenis_transaksi === 'masuk') {
@@ -176,8 +184,8 @@ export async function createKasHarian(data: Omit<KasHarian, 'id' | 'saldo_sebelu
   }
   
   const result = await pool.query(
-    'INSERT INTO kas_harian (tanggal, jenis_transaksi, kategori, deskripsi, jumlah, saldo_sebelum, saldo_sesudah, petugas, bukti_transaksi, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW()) RETURNING *',
-    [data.tanggal, data.jenis_transaksi, data.kategori, data.deskripsi, data.jumlah, currentSaldo, newSaldo, data.petugas, data.bukti_transaksi]
+    'INSERT INTO kas_harian (tanggal, jenis_transaksi, kategori, deskripsi, jumlah, saldo_sebelum, saldo_sesudah, petugas, bukti_transaksi, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW()) RETURNING *',
+    [data.tanggal, data.jenis_transaksi, data.kategori, data.deskripsi, data.jumlah, currentSaldo, newSaldo, data.petugas, data.bukti_transaksi, userId]
   );
   return result.rows[0];
 }
@@ -194,10 +202,10 @@ export async function getAllPengeluaran(): Promise<Pengeluaran[]> {
   }));
 }
 
-export async function createPengeluaran(data: Omit<Pengeluaran, 'id'>): Promise<Pengeluaran> {
+export async function createPengeluaran(data: any, userId: number): Promise<Pengeluaran> {
   const result = await pool.query(
-    'INSERT INTO pengeluaran (tanggal, kategori, sub_kategori, deskripsi, penerima, jumlah, metode_pembayaran, bukti_pembayaran, disetujui_oleh, status, keterangan, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW()) RETURNING *',
-    [data.tanggal, data.kategori, data.sub_kategori, data.deskripsi, data.penerima, data.jumlah, data.metode_pembayaran, data.bukti_pembayaran, data.disetujui_oleh, data.status, data.keterangan]
+    'INSERT INTO pengeluaran (tanggal, kategori, sub_kategori, deskripsi, penerima, jumlah, metode_pembayaran, bukti_pembayaran, disetujui_oleh, status, keterangan, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW()) RETURNING *',
+    [data.tanggal, data.kategori, data.sub_kategori, data.deskripsi, data.penerima, data.jumlah, data.metode_pembayaran, data.bukti_pembayaran, data.disetujui_oleh, data.status, data.keterangan, userId]
   );
   return result.rows[0];
 }

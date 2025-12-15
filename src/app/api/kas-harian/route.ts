@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
     const body = await request.json();
-    const newKas = await createKasHarian(body);
+    const newKas = await createKasHarian(body, user.userId);
     return NextResponse.json(newKas, { status: 201 });
   } catch (error: any) {
     if (error.message === 'Unauthorized') {

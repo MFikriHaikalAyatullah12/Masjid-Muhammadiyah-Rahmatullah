@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
     const body = await request.json();
-    const newPengeluaran = await createPengeluaran(body);
+    const newPengeluaran = await createPengeluaran(body, user.userId);
     return NextResponse.json(newPengeluaran, { status: 201 });
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
