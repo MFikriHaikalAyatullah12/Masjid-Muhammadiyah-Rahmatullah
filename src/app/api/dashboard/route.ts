@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { getDashboardStats } from '@/lib/database';
-import { requireAuth } from '@/lib/auth';
+import { getUserFromToken } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    const user = await getUserFromToken();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.log('Fetching dashboard stats for user:', user.userId);
     const stats = await getDashboardStats(user.userId);
     console.log('Dashboard stats fetched successfully:', stats);

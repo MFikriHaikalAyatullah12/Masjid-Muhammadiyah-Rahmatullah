@@ -154,7 +154,7 @@ export default function ZakatFitrahPage() {
           {/* Form Modal */}
           {showForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-white/60 backdrop-blur-sm rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Tambah Zakat Fitrah</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -334,7 +334,7 @@ export default function ZakatFitrahPage() {
           )}
 
       {/* Table - Desktop View */}
-      <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="hidden md:block bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -434,7 +434,7 @@ export default function ZakatFitrahPage() {
           </div>
         ) : (
           zakatList.map((zakat) => (
-            <div key={zakat.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div key={zakat.id} className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900 text-sm">{zakat.nama_muzakki}</h3>
@@ -487,7 +487,7 @@ export default function ZakatFitrahPage() {
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="bg-white/60 backdrop-blur-sm rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Konfirmasi Hapus
             </h3>

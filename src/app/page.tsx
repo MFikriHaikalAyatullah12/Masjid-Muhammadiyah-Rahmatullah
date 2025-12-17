@@ -89,7 +89,7 @@ export default function Dashboard() {
     <div className="space-y-6 md:space-y-8">
       {/* Header */}
       <div className="mb-6 md:mb-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-sm border border-emerald-100 p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
             {/* Logo Masjid */}
             <div className="flex-shrink-0">
@@ -162,8 +162,8 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Transactions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-4 md:px-6 py-4 md:py-6 border-b border-gray-200">
+      <div className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100">
+        <div className="px-4 md:px-6 py-4 md:py-6 border-b border-emerald-100">
           <h2 className="text-lg md:text-xl font-semibold text-gray-900">Transaksi Terbaru</h2>
           <p className="text-sm text-gray-600 mt-1">Aktivitas keuangan terkini</p>
         </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogIn, Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -95,23 +95,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-500 rounded-2xl shadow-md mb-4">
-            <LogIn className="w-8 h-8 text-white" />
-          </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             Sistem Administrasi Masjid
           </h1>
-          <p className="text-gray-500">
+          <p className="text-gray-600">
             {isLogin ? 'Selamat datang kembali' : 'Buat akun baru'}
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-emerald-100">
           {/* Toggle */}
           <div className="flex gap-4 mb-6">
             <button

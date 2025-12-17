@@ -191,7 +191,7 @@ export default function KasHarianPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4 md:p-6">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="p-2 rounded-lg bg-green-100 text-green-600">
               <Banknote className="w-5 h-5 md:w-6 md:h-6" />
@@ -203,7 +203,7 @@ export default function KasHarianPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4 md:p-6">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
               <TrendingUp className="w-5 h-5 md:w-6 md:h-6" />
@@ -215,7 +215,7 @@ export default function KasHarianPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4 md:p-6">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
               <Banknote className="w-5 h-5 md:w-6 md:h-6" />
@@ -233,8 +233,8 @@ export default function KasHarianPage() {
           {/* Form Modal */}
           {showForm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-gray-200">
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-gray-200">
+                <div className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 py-4 rounded-t-xl">
                   <h2 className="text-xl font-bold text-gray-900">Tambah Transaksi Kas</h2>
                 </div>
                 
@@ -347,7 +347,7 @@ export default function KasHarianPage() {
                   </div>
                 </form>
 
-                <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 rounded-b-xl">
+                <div className="sticky bottom-0 bg-white/80 backdrop-blur-md border-t border-gray-200 px-6 py-4 rounded-b-xl">
                   <div className="flex justify-end gap-3">
                     <button
                       type="button"
@@ -371,7 +371,7 @@ export default function KasHarianPage() {
           )}
 
       {/* Table - Desktop View */}
-      <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="hidden md:block bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -477,7 +477,7 @@ export default function KasHarianPage() {
           </div>
         ) : (
           kasList.map((kas) => (
-            <div key={kas.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div key={kas.id} className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -529,7 +529,7 @@ export default function KasHarianPage() {
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="bg-white/60 backdrop-blur-sm rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Konfirmasi Hapus
             </h3>

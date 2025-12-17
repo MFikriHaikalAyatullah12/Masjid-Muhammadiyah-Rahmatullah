@@ -226,7 +226,7 @@ export default function PengeluaranPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4 md:p-6">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="p-2 md:p-3 rounded-lg bg-yellow-100 text-yellow-600">
               <Clock className="w-5 h-5 md:w-6 md:h-6" />
@@ -239,7 +239,7 @@ export default function PengeluaranPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4 md:p-6">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="p-2 md:p-3 rounded-lg bg-blue-100 text-blue-600">
               <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
@@ -252,7 +252,7 @@ export default function PengeluaranPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4 md:p-6">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="p-2 md:p-3 rounded-lg bg-green-100 text-green-600">
               <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
@@ -265,7 +265,7 @@ export default function PengeluaranPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4 md:p-6">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="p-2 md:p-3 rounded-lg bg-red-100 text-red-600">
               <XCircle className="w-5 h-5 md:w-6 md:h-6" />
@@ -280,7 +280,7 @@ export default function PengeluaranPage() {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="hidden md:block bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -392,7 +392,7 @@ export default function PengeluaranPage() {
           </div>
         ) : (
           pengeluaranList.map((pengeluaran) => (
-            <div key={pengeluaran.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div key={pengeluaran.id} className="bg-white/60 backdrop-blur-sm rounded-lg shadow-sm border border-emerald-100 p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">

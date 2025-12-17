@@ -126,7 +126,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Building className="w-6 h-6 text-emerald-600" />
@@ -134,7 +134,7 @@ export default function Sidebar() {
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+            className="p-2 rounded-lg text-gray-600 hover:bg-emerald-100"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -147,7 +147,7 @@ export default function Sidebar() {
       )}
 
       {/* Mobile Sidebar */}
-      <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
+      <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-emerald-50 to-teal-50 shadow-xl transform transition-transform duration-300 ease-in-out ${
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
@@ -156,7 +156,7 @@ export default function Sidebar() {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:bg-white lg:border-r lg:border-gray-100 lg:flex lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:bg-gradient-to-b lg:from-emerald-50 lg:to-teal-50 lg:border-r lg:border-emerald-200 lg:flex lg:flex-col">
         <SidebarContent />
       </div>
     </>
