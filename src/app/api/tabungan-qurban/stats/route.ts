@@ -84,12 +84,16 @@ export async function GET(request: NextRequest) {
       }));
 
       const response = {
-        totalTabungan: parseInt(stats.total_tabungan) || 0,
-        totalTerkumpul: parseFloat(stats.total_terkumpul) || 0,
-        targetTotal: parseFloat(stats.target_total) || 0,
-        tabunganAktif: parseInt(stats.tabungan_aktif) || 0,
-        statusDistribution,
-        progressData
+        totalTabungan: Math.max(parseInt(stats.total_tabungan) || 0, 0),
+        totalTerkumpul: Math.max(parseFloat(stats.total_terkumpul) || 0, 0),
+        targetTotal: Math.max(parseFloat(stats.target_total) || 0, 0),
+        tabunganAktif: Math.max(parseInt(stats.tabungan_aktif) || 0, 0),
+        statusDistribution: statusDistribution.length > 0 ? statusDistribution : [{
+          status: 'tidak_ada_data',
+          count: 0,
+          percentage: 100
+        }],
+        progressData: progressData.length > 0 ? progressData : []
       };
 
       return NextResponse.json(response);

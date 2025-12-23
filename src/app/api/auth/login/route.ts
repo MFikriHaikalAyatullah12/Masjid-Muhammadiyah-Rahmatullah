@@ -55,14 +55,25 @@ export async function POST(request: NextRequest) {
       .setExpirationTime('7d')
       .sign(SECRET_KEY);
 
-    // Set cookie
+    // Set cookie with enhanced configuration
     const cookieStore = await cookies();
-    cookieStore.set('auth_token', token, {
+    
+    // Debug logging for production
+    console.log('Setting auth cookie for NODE_ENV:', process.env.NODE_ENV);
+    
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/'
+    };
+    
+    cookieStore.set('auth_token', token, cookieOptions);
+    
+    console.log('Auth cookie set with options:', {
+      ...cookieOptions,
+      tokenLength: token.length
     });
 
     return NextResponse.json({

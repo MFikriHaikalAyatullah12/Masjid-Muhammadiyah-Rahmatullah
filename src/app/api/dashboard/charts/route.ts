@@ -1,19 +1,13 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { Pool } from 'pg';
-import { getUserFromToken } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth';
+import pool from '@/lib/db';
 import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUserFromToken();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Use requireAuth instead of getUserFromToken for consistent error handling
+    const user = await requireAuth();
 
     const client = await pool.connect();
 
@@ -194,10 +188,32 @@ export async function GET(request: NextRequest) {
     } finally {
       client.release();
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching chart data:', error);
+    
+    // Handle authentication errors
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    // Handle database connection errors
+    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+      return NextResponse.json(
+        { 
+          error: 'Database connection failed',
+          details: 'Unable to connect to database'
+        },
+        { status: 503 }
+      );
+    }
+    
+    // Handle other errors
     return NextResponse.json(
-      { error: 'Gagal mengambil data chart' },
+      { 
+        error: 'Gagal mengambil data chart',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }

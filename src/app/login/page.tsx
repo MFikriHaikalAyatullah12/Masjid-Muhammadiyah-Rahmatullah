@@ -28,6 +28,14 @@ export default function LoginPage() {
     setError('');
 
     try {
+      // First, clear any existing cookies that might have wrong signature
+      console.log('Clearing existing cookies...');
+      await fetch('/api/auth/clear-cookies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      console.log('Attempting login...');
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -37,12 +45,16 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        router.push('/');
-        router.refresh();
+        console.log('Login successful, redirecting to dashboard...');
+        // Add a small delay to ensure cookie is set
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 200);
       } else {
         setError(data.error || 'Login gagal');
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError('Terjadi kesalahan saat login');
     } finally {
       setLoading(false);

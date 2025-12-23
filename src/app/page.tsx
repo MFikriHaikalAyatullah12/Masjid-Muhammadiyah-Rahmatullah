@@ -27,15 +27,26 @@ export default function Dashboard() {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
+      console.log('Fetching dashboard stats...');
+      
       const response = await fetch('/api/dashboard');
       
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Dashboard API error:', response.status, errorText);
+        
+        // If unauthorized, redirect to login
+        if (response.status === 401) {
+          console.log('Unauthorized access, redirecting to login...');
+          window.location.href = '/login';
+          return;
+        }
+        
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
       
       const data = await response.json();
+      console.log('Dashboard stats received:', data);
       
       // Validate the response data structure
       if (!data || typeof data !== 'object') {

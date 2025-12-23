@@ -157,12 +157,16 @@ export default function PengeluaranPage() {
     });
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | string) => {
+    const numAmount = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
+    if (!isFinite(numAmount)) {
+      return 'Rp 0';
+    }
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
-    }).format(amount);
+    }).format(numAmount);
   };
 
   const formatDate = (dateString: string) => {
@@ -176,7 +180,10 @@ export default function PengeluaranPage() {
   const getTotalByStatus = (status: string) => {
     return pengeluaranList
       .filter(p => p.status === status)
-      .reduce((total, p) => total + p.jumlah, 0);
+      .reduce((total, p) => {
+        const amount = typeof p.jumlah === 'number' ? p.jumlah : parseFloat(p.jumlah) || 0;
+        return total + amount;
+      }, 0);
   };
 
   const getStatusColor = (status: string) => {

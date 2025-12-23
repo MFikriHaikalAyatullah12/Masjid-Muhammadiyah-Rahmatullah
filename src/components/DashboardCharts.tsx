@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { format, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths } from 'date-fns';
-import { id as localeId } from 'date-fns/locale';
 
 interface ChartData {
   monthlyStats: Array<{
@@ -39,12 +38,13 @@ const formatNumber = (value: number) => {
 };
 
 export default function DashboardCharts() {
+  const router = useRouter();
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchChartData();
-    // Setup interval for real-time updates every 30 seconds
     const interval = setInterval(fetchChartData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -52,35 +52,106 @@ export default function DashboardCharts() {
   const fetchChartData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/dashboard/charts');
+      setError(null);
+      
+      const response = await fetch('/api/dashboard/charts', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      
+      if (response.status === 401) {
+        router.push('/login');
+        return;
+      }
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      setChartData(data);
-    } catch (error) {
+      
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response format');
+      }
+      
+      const validatedData: ChartData = {
+        monthlyStats: Array.isArray(data.monthlyStats) ? data.monthlyStats : [],
+        categoryStats: Array.isArray(data.categoryStats) ? data.categoryStats : []
+      };
+      
+      setChartData(validatedData);
+    } catch (error: any) {
       console.error('Error fetching chart data:', error);
+      setError(error.message || 'Gagal memuat data grafik');
+      
+      setChartData({
+        monthlyStats: [],
+        categoryStats: []
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading || !chartData) {
+  if (loading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Loading placeholders */}
-        <div className="bg-slate-100/80 backdrop-blur-sm rounded-lg shadow-sm border border-slate-200/60 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="animate-pulse">
-            <div className="h-4 bg-slate-300 rounded w-1/3 mb-4"></div>
-            <div className="h-64 bg-slate-300 rounded"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/3 mb-4"></div>
+            <div className="h-64 bg-gray-300 rounded"></div>
           </div>
         </div>
-        <div className="bg-slate-100/80 backdrop-blur-sm rounded-lg shadow-sm border border-slate-200/60 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="animate-pulse">
-            <div className="h-4 bg-slate-300 rounded w-1/3 mb-4"></div>
-            <div className="h-64 bg-slate-300 rounded"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/3 mb-4"></div>
+            <div className="h-64 bg-gray-300 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="lg:col-span-2 bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center justify-center text-center">
+            <div>
+              <h3 className="text-lg font-semibold text-red-800 mb-2">Gagal Memuat Data Grafik</h3>
+              <p className="text-red-600 mb-4">{error}</p>
+              <button
+                onClick={fetchChartData}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!chartData || (!chartData.monthlyStats.length && !chartData.categoryStats.length)) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="lg:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-12">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Belum Ada Data</h3>
+            <p className="text-gray-600 mb-4">
+              Mulai menambahkan transaksi untuk melihat grafik statistik keuangan
+            </p>
+            <button
+              onClick={fetchChartData}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              Refresh Data
+            </button>
           </div>
         </div>
       </div>
@@ -90,118 +161,138 @@ export default function DashboardCharts() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Pemasukan vs Pengeluaran Chart */}
-      <div className="bg-slate-100/80 backdrop-blur-sm rounded-lg shadow-sm border border-slate-200/60">
-        <div className="px-6 py-4 border-b border-slate-200/60">
-          <h2 className="text-lg font-semibold text-gray-900">Pemasukan vs Pengeluaran (6 Bulan)</h2>
-          <p className="text-sm text-gray-600 mt-1">Trend keuangan bulanan</p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-900">Pemasukan vs Pengeluaran</h2>
+          <p className="text-sm text-gray-600 mt-1">Trend keuangan 6 bulan terakhir</p>
         </div>
         <div className="p-6">
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData.monthlyStats}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="bulan" 
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-              />
-              <YAxis 
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-                tickFormatter={formatNumber}
-              />
-              <Tooltip 
-                formatter={(value: number | undefined) => [formatCurrency(value || 0), '']}
-                labelStyle={{ color: '#374151' }}
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                  border: '1px solid #d1fae5',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                }}
-              />
-              <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="pemasukan" 
-                stroke="#059669" 
-                strokeWidth={3}
-                dot={{ fill: '#059669', strokeWidth: 2, r: 5 }}
-                activeDot={{ r: 7, stroke: '#059669', strokeWidth: 2, fill: '#ffffff' }}
-                name="Pemasukan"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="pengeluaran" 
-                stroke="#dc2626" 
-                strokeWidth={3}
-                dot={{ fill: '#dc2626', strokeWidth: 2, r: 5 }}
-                activeDot={{ r: 7, stroke: '#dc2626', strokeWidth: 2, fill: '#ffffff' }}
-                name="Pengeluaran"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {chartData.monthlyStats.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData.monthlyStats}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis 
+                  dataKey="bulan" 
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis 
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={formatNumber}
+                />
+                <Tooltip 
+                  formatter={(value: number | undefined) => [formatCurrency(value || 0), '']}
+                  labelStyle={{ color: '#374151' }}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{ 
+                    fontSize: '14px', 
+                    fontWeight: '500' 
+                  }} 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="pemasukan" 
+                  stroke="#059669" 
+                  strokeWidth={3}
+                  dot={{ fill: '#059669', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name="Pemasukan"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="pengeluaran" 
+                  stroke="#dc2626" 
+                  strokeWidth={3}
+                  dot={{ fill: '#dc2626', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name="Pengeluaran"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-gray-500">
+              <div className="text-center">
+                <p className="text-sm">Belum ada data transaksi</p>
+                <p className="text-xs mt-1">Tambahkan transaksi untuk melihat grafik</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Kategori Terbesar Pie Chart */}
-      <div className="bg-slate-100/80 backdrop-blur-sm rounded-lg shadow-sm border border-slate-200/60">
-        <div className="px-6 py-4 border-b border-slate-200/60">
-          <h2 className="text-lg font-semibold text-gray-900">Kategori Terbesar</h2>
-          <p className="text-sm text-gray-600 mt-1">Distribusi pengeluaran per kategori</p>
+      {/* Kategori Pengeluaran Chart */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-900">Kategori Pengeluaran</h2>
+          <p className="text-sm text-gray-600 mt-1">Distribusi pengeluaran 30 hari terakhir</p>
         </div>
         <div className="p-6">
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={chartData.categoryStats}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ payload }: any) => `${payload?.persentase || 0}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="total"
-              >
-                {chartData.categoryStats.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          {chartData.categoryStats.length > 0 && chartData.categoryStats[0].kategori !== 'Tidak ada data' ? (
+            <>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={chartData.categoryStats}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ payload }: any) => `${payload?.persentase || 0}%`}
+                    outerRadius={90}
+                    fill="#8884d8"
+                    dataKey="total"
+                  >
+                    {chartData.categoryStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number | undefined) => [formatCurrency(value || 0), 'Total']}
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              
+              <div className="mt-4 space-y-2">
+                {chartData.categoryStats.slice(0, 6).map((item, index) => (
+                  <div key={item.kategori} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-gray-700 font-medium">{item.kategori}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-gray-900">{formatCurrency(item.total)}</div>
+                      <div className="text-xs text-gray-500">{item.persentase}%</div>
+                    </div>
+                  </div>
                 ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value: number | undefined) => [formatCurrency(value || 0), 'Total']}
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                  border: '1px solid #d1fae5',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          
-          {/* Legend */}
-          <div className="mt-4 grid grid-cols-1 gap-2">
-            {chartData.categoryStats.map((item, index) => (
-              <div key={item.kategori} className="flex items-center gap-3">
-                <div 
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                ></div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-900 truncate">
-                      {item.kategori}
-                    </span>
-                    <span className="text-sm text-gray-500 ml-2">
-                      {item.persentase}%
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {formatCurrency(item.total)}
-                  </div>
-                </div>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="h-[250px] flex items-center justify-center text-gray-500">
+              <div className="text-center">
+                <p className="text-sm">Belum ada data pengeluaran</p>
+                <p className="text-xs mt-1">Tambahkan pengeluaran untuk melihat distribusi</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

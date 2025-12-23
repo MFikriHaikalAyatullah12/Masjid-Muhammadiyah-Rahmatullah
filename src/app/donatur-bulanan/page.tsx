@@ -292,7 +292,7 @@ export default function DonaturBulananPage() {
             placeholder="Cari donatur..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
           />
         </div>
       </div>
@@ -374,7 +374,7 @@ export default function DonaturBulananPage() {
               required
               value={formData.nama}
               onChange={(e) => setFormData({...formData, nama: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
             />
           </div>
 
@@ -386,7 +386,7 @@ export default function DonaturBulananPage() {
               type="tel"
               value={formData.no_telepon}
               onChange={(e) => setFormData({...formData, no_telepon: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
             />
           </div>
 
@@ -398,7 +398,7 @@ export default function DonaturBulananPage() {
               value={formData.alamat}
               onChange={(e) => setFormData({...formData, alamat: e.target.value})}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
             />
           </div>
 
@@ -415,7 +415,7 @@ export default function DonaturBulananPage() {
                   value={formData.jumlah_donasi}
                   onChange={(e) => setFormData({...formData, jumlah_donasi: formatRupiah(e.target.value)})}
                   placeholder="1.500.000"
-                  className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
                 />
               </div>
             </div>
@@ -427,7 +427,7 @@ export default function DonaturBulananPage() {
               <select
                 value={formData.tanggal_pembayaran}
                 onChange={(e) => setFormData({...formData, tanggal_pembayaran: parseInt(e.target.value)})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
               >
                 {[...Array(31)].map((_, i) => (
                   <option key={i+1} value={i+1}>{i+1}</option>
@@ -446,7 +446,7 @@ export default function DonaturBulananPage() {
                 required
                 value={formData.tanggal_mulai}
                 onChange={(e) => setFormData({...formData, tanggal_mulai: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
               />
             </div>
 
@@ -457,7 +457,7 @@ export default function DonaturBulananPage() {
               <select
                 value={formData.metode_pembayaran}
                 onChange={(e) => setFormData({...formData, metode_pembayaran: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
               >
                 <option value="transfer">Transfer</option>
                 <option value="tunai">Tunai</option>
@@ -474,7 +474,7 @@ export default function DonaturBulananPage() {
               value={formData.keterangan}
               onChange={(e) => setFormData({...formData, keterangan: e.target.value})}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
             />
           </div>
 
@@ -521,7 +521,7 @@ export default function DonaturBulananPage() {
               <select
                 value={paymentData.bulan}
                 onChange={(e) => setPaymentData({...paymentData, bulan: parseInt(e.target.value)})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
               >
                 {['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'].map((bulan, idx) => (
@@ -538,7 +538,7 @@ export default function DonaturBulananPage() {
                 type="number"
                 value={paymentData.tahun}
                 onChange={(e) => setPaymentData({...paymentData, tahun: parseInt(e.target.value)})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
               />
             </div>
           </div>
@@ -553,7 +553,7 @@ export default function DonaturBulananPage() {
                 required
                 value={paymentData.tanggal_bayar}
                 onChange={(e) => setPaymentData({...paymentData, tanggal_bayar: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
               />
             </div>
 
@@ -569,7 +569,7 @@ export default function DonaturBulananPage() {
                   value={typeof paymentData.jumlah === 'number' ? formatRupiah(paymentData.jumlah.toString()) : formatRupiah(paymentData.jumlah)}
                   onChange={(e) => setPaymentData({...paymentData, jumlah: e.target.value as any})}
                   placeholder="500.000"
-                  className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
                 />
               </div>
             </div>
@@ -582,7 +582,7 @@ export default function DonaturBulananPage() {
             <select
               value={paymentData.metode_pembayaran}
               onChange={(e) => setPaymentData({...paymentData, metode_pembayaran: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
             >
               <option value="transfer">Transfer</option>
               <option value="tunai">Tunai</option>
@@ -598,7 +598,7 @@ export default function DonaturBulananPage() {
               value={paymentData.keterangan}
               onChange={(e) => setPaymentData({...paymentData, keterangan: e.target.value})}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-800 bg-white"
             />
           </div>
 
