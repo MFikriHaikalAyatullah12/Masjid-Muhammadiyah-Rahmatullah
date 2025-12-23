@@ -68,7 +68,8 @@ export default function KasHarianPage() {
       }
       const data = await response.json();
       setKasList(Array.isArray(data.data) ? data.data : []);
-      setCurrentSaldo(data.currentSaldo || 0);
+      const saldo = parseFloat(data.currentSaldo?.toString()) || 0;
+      setCurrentSaldo(isNaN(saldo) ? 0 : saldo);
     } catch (error) {
       console.error('Error fetching kas harian:', error);
       setKasList([]);
@@ -111,11 +112,12 @@ export default function KasHarianPage() {
   };
 
   const formatCurrency = (amount: number) => {
+    const value = isNaN(amount) ? 0 : amount;
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
-    }).format(amount);
+    }).format(value);
   };
 
   const formatDate = (dateString: string) => {
@@ -152,15 +154,17 @@ export default function KasHarianPage() {
   };
 
   const getTotalMasuk = () => {
-    return kasList
+    const total = kasList
       .filter(kas => kas.jenis_transaksi === 'masuk')
-      .reduce((total, kas) => total + kas.jumlah, 0);
+      .reduce((total, kas) => total + (parseFloat(kas.jumlah?.toString()) || 0), 0);
+    return isNaN(total) ? 0 : total;
   };
 
   const getTotalKeluar = () => {
-    return kasList
+    const total = kasList
       .filter(kas => kas.jenis_transaksi === 'keluar')
-      .reduce((total, kas) => total + kas.jumlah, 0);
+      .reduce((total, kas) => total + (parseFloat(kas.jumlah?.toString()) || 0), 0);
+    return isNaN(total) ? 0 : total;
   };
 
   return (

@@ -5,6 +5,7 @@ import { Sparkles, Plus, Search, DollarSign, TrendingUp, Target, Trash2 } from '
 import Alert from '@/components/Alert';
 import Modal from '@/components/Modal';
 import Loading from '@/components/Loading';
+import TabunganCharts from '@/components/TabunganCharts';
 
 interface Tabungan {
   id: number;
@@ -298,6 +299,11 @@ export default function TabunganQurbanPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="mb-6">
+        <TabunganCharts />
       </div>
 
       {/* Search */}
