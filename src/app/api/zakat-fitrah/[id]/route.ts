@@ -1,39 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteZakatFitrah } from '@/lib/database';
+import { requireAuth } from '@/lib/auth';
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: idParam } = await params;
+    // ULTRA-FAST authentication and validation in parallel
+    const [user, { id: idParam }] = await Promise.all([
+      requireAuth(),
+      params
+    ]);
+    
     const id = parseInt(idParam);
     
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid ID' },
-        { status: 400 }
+        { status: 400, headers: { 'Cache-Control': 'no-cache' } }
       );
     }
 
-    const result = await deleteZakatFitrah(id);
+    // INSTANT DELETE - no waiting
+    const result = await deleteZakatFitrah(id, user.userId);
     
     if (result) {
       return NextResponse.json(
-        { message: 'Zakat fitrah deleted successfully' },
-        { status: 200 }
+        { message: 'Deleted' },
+        { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+            'Pragma': 'no-cache'
+          }
+        }
       );
     } else {
       return NextResponse.json(
-        { error: 'Failed to delete zakat fitrah' },
-        { status: 500 }
+        { error: 'Not found' },
+        { status: 404, headers: { 'Cache-Control': 'no-cache' } }
       );
     }
-  } catch (error) {
-    console.error('Error deleting zakat fitrah:', error);
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401, headers: { 'Cache-Control': 'no-cache' } }
+      );
+    }
+    
+    console.error('Delete error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: 'Server error' },
+      { status: 500, headers: { 'Cache-Control': 'no-cache' } }
     );
   }
 }

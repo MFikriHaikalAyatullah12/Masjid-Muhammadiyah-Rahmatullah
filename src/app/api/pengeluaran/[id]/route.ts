@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deletePengeluaran } from '@/lib/database';
+import { requireAuth } from '@/lib/auth';
 import pool from '@/lib/db';
 
 export async function PATCH(
@@ -112,6 +113,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Check authentication first
+    const user = await requireAuth();
+    
     const { id: idParam } = await params;
     const id = parseInt(idParam);
     
@@ -122,21 +126,34 @@ export async function DELETE(
       );
     }
 
-    const result = await deletePengeluaran(id);
+    const result = await deletePengeluaran(id, user.userId);
     
     if (result) {
       return NextResponse.json(
         { message: 'Pengeluaran deleted successfully' },
-        { status: 200 }
+        { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+          }
+        }
       );
     } else {
       return NextResponse.json(
-        { error: 'Failed to delete pengeluaran' },
-        { status: 500 }
+        { error: 'Failed to delete pengeluaran or data not found' },
+        { status: 404 }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting pengeluaran:', error);
+    
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

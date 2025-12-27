@@ -202,21 +202,21 @@ export async function GET(request: NextRequest) {
         
         // Zakat Fitrah
         client.query(`
-          SELECT SUM(total_rupiah) as total
+          SELECT COALESCE(SUM(total_rupiah), 0) as total
           FROM zakat_fitrah 
           WHERE user_id = $1 AND tanggal_bayar BETWEEN $2 AND $3
         `, [user.userId, dari, sampai]),
         
         // Zakat Mal
         client.query(`
-          SELECT SUM(jumlah_zakat) as total
+          SELECT COALESCE(SUM(jumlah_zakat), 0) as total
           FROM zakat_mal 
           WHERE user_id = $1 AND tanggal_bayar BETWEEN $2 AND $3
         `, [user.userId, dari, sampai]),
         
-        // Donatur Bulanan - TAMBAHAN BARU
+        // Donatur Bulanan - PERBAIKAN QUERY
         client.query(`
-          SELECT SUM(pd.jumlah) as total
+          SELECT COALESCE(SUM(pd.jumlah), 0) as total
           FROM pembayaran_donatur pd
           JOIN donatur_bulanan db ON pd.donatur_id = db.id
           WHERE db.user_id = $1 AND pd.tanggal_bayar BETWEEN $2 AND $3
@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
         
         // Tabungan Qurban
         client.query(`
-          SELECT SUM(cq.jumlah) as total
+          SELECT COALESCE(SUM(cq.jumlah), 0) as total
           FROM cicilan_qurban cq
           JOIN tabungan_qurban tq ON cq.tabungan_id = tq.id
           WHERE tq.user_id = $1 AND cq.tanggal_bayar BETWEEN $2 AND $3
@@ -319,7 +319,7 @@ export async function GET(request: NextRequest) {
       let counter = 1;
       let totalPemasukan = 0;
       
-      // Kas masuk per kategori (data real dari web)
+      // Kas masuk per kategori (dari kas_harian)
       kasMasuk.forEach(item => {
         const kategori = item.kategori.toUpperCase().replace(/_/g, ' ');
         const total = parseFloat(item.total);
@@ -331,7 +331,7 @@ export async function GET(request: NextRequest) {
         counter++;
       });
       
-      // Zakat Fitrah (jika ada)
+      // Zakat Fitrah (dari tabel zakat_fitrah - tidak ada di kas_harian)
       if (zakatFitrah > 0) {
         doc.text(`${counter}. ZAKAT FITRAH`, 25, y);
         doc.text(': ', 125, y);
@@ -341,7 +341,7 @@ export async function GET(request: NextRequest) {
         counter++;
       }
       
-      // Zakat Mal (jika ada)
+      // Zakat Mal (dari tabel zakat_mal - tidak ada di kas_harian)
       if (zakatMal > 0) {
         doc.text(`${counter}. ZAKAT MAL`, 25, y);
         doc.text(': ', 125, y);
@@ -351,7 +351,7 @@ export async function GET(request: NextRequest) {
         counter++;
       }
       
-      // Donatur Bulanan (jika ada)
+      // Donatur Bulanan (dari pembayaran_donatur - tidak ada di kas_harian)
       if (donatur > 0) {
         doc.text(`${counter}. DONATUR BULANAN`, 25, y);
         doc.text(': ', 125, y);
@@ -361,42 +361,12 @@ export async function GET(request: NextRequest) {
         counter++;
       }
       
-      // Tabungan Qurban (jika ada)
+      // Tabungan Qurban (dari cicilan_qurban - tidak ada di kas_harian)
       if (tabungan > 0) {
         doc.text(`${counter}. TABUNGAN QURBAN`, 25, y);
         doc.text(': ', 125, y);
         doc.text(formatRupiah(tabungan), 170, y, { align: 'right' });
         totalPemasukan += parseFloat(String(tabungan));
-        y += 8;
-        counter++;
-      }
-      
-      // Tabungan Qurban (jika ada)
-      if (tabungan > 0) {
-        doc.text(`${counter}. TABUNGAN QURBAN`, 25, y);
-        doc.text(': ', 125, y);
-        doc.text(formatRupiah(tabungan), 170, y, { align: 'right' });
-        totalPemasukan += parseFloat(String(tabungan));
-        y += 8;
-        counter++;
-      }
-
-      // Zakat Fitrah (data real dari web)
-      if (zakatFitrah > 0) {
-        doc.text(`${counter}. ZAKAT FITRAH`, 25, y);
-        doc.text(': ', 125, y);
-        doc.text(formatRupiah(zakatFitrah), 170, y, { align: 'right' });
-        totalPemasukan += parseFloat(zakatFitrah.toString());
-        y += 8;
-        counter++;
-      }
-
-      // Zakat Mal (data real dari web)
-      if (zakatMal > 0) {
-        doc.text(`${counter}. ZAKAT MAL`, 25, y);
-        doc.text(': ', 125, y);
-        doc.text(formatRupiah(zakatMal), 170, y, { align: 'right' });
-        totalPemasukan += parseFloat(zakatMal.toString());
         y += 8;
         counter++;
       }

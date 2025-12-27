@@ -7,6 +7,17 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 async function setupDatabase() {
+  // Skip database setup during build process or when DATABASE_URL is not available
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    console.log('⚠️  Skipping database setup - Production build without DATABASE_URL');
+    return;
+  }
+  
+  if (!process.env.DATABASE_URL) {
+    console.log('⚠️  Skipping database setup - DATABASE_URL not found');
+    return;
+  }
+  
   console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Loaded' : 'Not loaded');
   
   const client = new Client({

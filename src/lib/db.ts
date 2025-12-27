@@ -10,16 +10,17 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { 
     rejectUnauthorized: false
   } : false,
-  max: 20,
-  min: 2,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 15000,
-  statement_timeout: 60000,
-  query_timeout: 60000,
+  // NEON DATABASE OPTIMIZED SETTINGS
+  max: 25,                    // Optimal for Neon
+  min: 2,                     // Keep minimal idle connections
+  idleTimeoutMillis: 30000,   // Longer for Neon stability
+  connectionTimeoutMillis: 15000, // Extended for Neon wake-up time
+  statement_timeout: 45000,   // Extended for complex queries
+  query_timeout: 45000,       // Extended query timeout
   keepAlive: true,
   keepAliveInitialDelayMillis: 10000,
-  // Enhanced retry settings
-  application_name: 'masjid_app',
+  // Neon-specific optimizations
+  application_name: 'masjid_neon_optimized',
 });
 
 // Test connection on startup
@@ -30,5 +31,20 @@ pool.on('connect', () => {
 pool.on('error', (err) => {
   console.error('Database connection error:', err);
 });
+
+// Database warmup function for Neon
+export async function warmupDatabase() {
+  try {
+    await pool.query('SELECT 1');
+    console.log('Database warmed up successfully');
+  } catch (error) {
+    console.error('Database warmup failed:', error);
+  }
+}
+
+// Auto warmup on module load
+if (process.env.NODE_ENV === 'production') {
+  warmupDatabase();
+}
 
 export default pool;

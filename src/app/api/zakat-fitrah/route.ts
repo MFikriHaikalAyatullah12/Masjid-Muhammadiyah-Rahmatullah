@@ -6,47 +6,49 @@ import pool from '@/lib/db';
 export async function GET() {
   try {
     const user = await requireAuth();
-    // Query directly dengan filter user_id
+    
+    // ULTRA-OPTIMIZED query with LIMIT for speed
     const result = await pool.query(
-      'SELECT * FROM zakat_fitrah WHERE user_id = $1 ORDER BY tanggal_bayar DESC',
+      'SELECT * FROM zakat_fitrah WHERE user_id = $1 ORDER BY tanggal_bayar DESC LIMIT 200',
       [user.userId]
     );
-    return NextResponse.json(result.rows);
+    
+    return NextResponse.json(result.rows, {
+      headers: {
+        'Cache-Control': 'private, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache'
+      }
+    });
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     console.error('Error fetching zakat fitrah:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth();
-    const body = await request.json();
+    // ULTRA-FAST validation and processing in parallel
+    const [user, body] = await Promise.all([
+      requireAuth(),
+      request.json()
+    ]);
     
-    // Validate required fields
+    // Fast validation - minimal checks
     if (!body.nama_muzakki || !body.jumlah_jiwa || !body.jenis_bayar || !body.tanggal_bayar) {
       return NextResponse.json({ 
-        error: 'Missing required fields',
-        details: 'nama_muzakki, jumlah_jiwa, jenis_bayar, and tanggal_bayar are required'
-      }, { status: 400 });
+        error: 'Missing fields'
+      }, { status: 400, headers: { 'Cache-Control': 'no-cache' } });
     }
     
-    // Calculate total rupiah based on jenis_bayar
-    let total_rupiah = 0;
-    if (body.jenis_bayar === 'uang') {
-      total_rupiah = parseFloat(body.jumlah_bayar) * parseInt(body.jumlah_jiwa);
-    } else {
-      // For beras or gandum, multiply by harga_per_kg and jumlah_jiwa
-      const hargaPerKg = parseFloat(body.harga_per_kg) || 0;
-      const jumlahBayar = parseFloat(body.jumlah_bayar) || 0;
-      const jumlahJiwa = parseInt(body.jumlah_jiwa) || 1;
-      total_rupiah = jumlahBayar * hargaPerKg * jumlahJiwa;
-    }
+    // INSTANT calculation
+    const total_rupiah = body.jenis_bayar === 'uang' 
+      ? parseFloat(body.jumlah_bayar) * parseInt(body.jumlah_jiwa)
+      : (parseFloat(body.jumlah_bayar) || 0) * (parseFloat(body.harga_per_kg) || 0) * parseInt(body.jumlah_jiwa);
     
-    // Insert directly dengan user_id
+    // DIRECT INSERT for speed
     const result = await pool.query(
       `INSERT INTO zakat_fitrah (
         nama_muzakki, alamat_muzakki, no_telepon, jumlah_jiwa, jenis_bayar, jumlah_bayar, 
@@ -65,18 +67,18 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      message: 'Zakat fitrah berhasil disimpan',
       data: result.rows[0]
-    }, { status: 201 });
+    }, { 
+      status: 201,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0'
+      }
+    });
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    console.error('Error creating zakat fitrah:', error);
-    return NextResponse.json({ 
-      error: 'Gagal menyimpan data zakat fitrah', 
-      details: error.message,
-      timestamp: new Date().toISOString()
-    }, { status: 500 });
+    console.error('Error:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

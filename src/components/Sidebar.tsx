@@ -42,20 +42,26 @@ const navigation: NavigationItem[] = [
 ];
 
 // Optimized navigation item component
-const NavigationItem = memo(({ item, pathname, onClick }: { 
+const NavigationItem = memo(({ item, pathname, onClick, onNavigate }: { 
   item: NavigationItem; 
   pathname: string; 
   onClick?: () => void;
+  onNavigate?: (href: string) => void;
 }) => {
   const isActive = pathname === item.href;
   const IconComponent = item.icon;
   const isDanger = item.danger;
   
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    onClick?.();
+    onNavigate?.(item.href);
+  }, [onClick, onNavigate, item.href]);
+  
   return (
     <Link
       href={item.href}
-      onClick={onClick}
-      className={`flex items-center gap-3 px-4 py-4 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px] touch-manipulation gpu-accelerated ${
+      onClick={handleClick}
+      className={`flex items-center gap-3 px-4 py-4 rounded-xl text-sm font-medium transition-all duration-150 min-h-[44px] touch-manipulation will-change-transform ${
         isActive
           ? isDanger 
             ? 'bg-red-50 text-red-600 shadow-sm border-l-4 border-red-500'
@@ -65,6 +71,7 @@ const NavigationItem = memo(({ item, pathname, onClick }: {
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm'
       }`}
       prefetch={true}
+      replace={false}
     >
       <IconComponent className="w-5 h-5 flex-shrink-0" />
       <span className="truncate">{item.name}</span>
@@ -81,6 +88,7 @@ const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleLogout = useCallback(async () => {
     if (!confirm('Yakin ingin keluar?')) return;
@@ -97,6 +105,14 @@ const Sidebar = () => {
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
   }, []);
+  
+  // Instant navigation handler
+  const handleNavigation = useCallback((href: string) => {
+    setIsNavigating(true);
+    closeMobileMenu();
+    // Reset navigation state after transition
+    setTimeout(() => setIsNavigating(false), 300);
+  }, [closeMobileMenu]);
 
   const SidebarContent = () => (
     <>
@@ -130,6 +146,7 @@ const Sidebar = () => {
                   item={item} 
                   pathname={pathname} 
                   onClick={closeMobileMenu}
+                  onNavigate={handleNavigation}
                 />
               </li>
             );

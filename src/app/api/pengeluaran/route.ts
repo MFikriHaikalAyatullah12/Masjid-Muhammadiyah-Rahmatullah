@@ -6,48 +6,82 @@ import pool from '@/lib/db';
 export async function GET() {
   try {
     const user = await requireAuth();
-    const result = await pool.query(
-      'SELECT * FROM pengeluaran WHERE user_id = $1 ORDER BY tanggal DESC',
-      [user.userId]
-    );
-    return NextResponse.json(result.rows);
+    
+    // Use optimized function with user isolation
+    const result = await getAllPengeluaran(user.userId);
+    
+    return NextResponse.json(result, {
+      headers: {
+        'Cache-Control': 'private, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache'
+      }
+    });
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     console.error('Error fetching pengeluaran:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth();
-    const body = await request.json();
+    // ULTRA-FAST parallel processing
+    const [user, body] = await Promise.all([
+      requireAuth(),
+      request.json()
+    ]);
+    
     const newPengeluaran = await createPengeluaran(body, user.userId);
-    return NextResponse.json(newPengeluaran, { status: 201 });
+    
+    return NextResponse.json(newPengeluaran, { 
+      status: 201,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0'
+      }
+    });
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     console.error('Error creating pengeluaran:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
 export async function PATCH(request: NextRequest) {
   try {
-    const body = await request.json();
+    // ULTRA-FAST approval processing
+    const [user, body] = await Promise.all([
+      requireAuth(),
+      request.json()
+    ]);
+    
     const { id, action, disetujui_oleh } = body;
     
     if (action === 'approve') {
-      await approvePengeluaran(id, disetujui_oleh);
-      return NextResponse.json({ message: 'Pengeluaran approved successfully' });
+      // INSTANT APPROVAL with user context
+      await approvePengeluaran(id, disetujui_oleh || user.nama, user.userId);
+      
+      return NextResponse.json(
+        { message: 'Approved', success: true },
+        { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+            'Pragma': 'no-cache'
+          }
+        }
+      );
     }
     
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
-    console.error('Error updating pengeluaran:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    console.error('Approval error:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

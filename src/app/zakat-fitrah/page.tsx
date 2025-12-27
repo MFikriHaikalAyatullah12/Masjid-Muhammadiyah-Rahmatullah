@@ -53,13 +53,32 @@ export default function ZakatFitrahPage() {
   }, [error, success]);
 
   useEffect(() => {
+    // Instant loading - no delay
     fetchZakatFitrah();
   }, []);
 
-  const fetchZakatFitrah = async () => {
+  const fetchZakatFitrah = async (showLoadingIndicator = true) => {
+    if (showLoadingIndicator) {
+      setLoading(true);
+    }
+    
     try {
       setError(null);
-      const response = await fetch('/api/zakat-fitrah');
+      
+      // ULTRA-FAST fetch with minimal timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // Extended for Neon
+      
+      const response = await fetch('/api/zakat-fitrah', {
+        signal: controller.signal,
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, max-age=0',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      clearTimeout(timeoutId);
       
       if (response.status === 401) {
         window.location.href = '/login';
@@ -72,12 +91,23 @@ export default function ZakatFitrahPage() {
       
       const data = await response.json();
       setZakatList(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching zakat fitrah:', error);
-      setError('Gagal memuat data zakat fitrah. Silakan refresh halaman.');
-      setZakatList([]);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.error('Request timeout:', error);
+        if (showLoadingIndicator) {
+          setError('Koneksi lambat. Silakan coba lagi.');
+        }
+      } else {
+        console.error('Error fetching zakat fitrah:', error);
+        if (showLoadingIndicator) {
+          setError('Gagal memuat data. Silakan coba lagi.');
+          setZakatList([]);
+        }
+      }
     } finally {
-      setLoading(false);
+      if (showLoadingIndicator) {
+        setLoading(false);
+      }
     }
   };
 
@@ -107,6 +137,7 @@ export default function ZakatFitrahPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        cache: 'no-store'
       });
 
       const responseData = await response.json();
@@ -120,8 +151,13 @@ export default function ZakatFitrahPage() {
         throw new Error(responseData.details || responseData.error || 'Gagal menyimpan data');
       }
 
+      // Optimistic update - add to list immediately
+      const newZakat = responseData.data;
+      if (newZakat) {
+        setZakatList(prevList => [newZakat, ...prevList]);
+      }
+      
       setSuccess(responseData.message || 'Data zakat fitrah berhasil disimpan!');
-      await fetchZakatFitrah();
       setShowForm(false);
       setFormData({
         nama_muzakki: '',
@@ -135,6 +171,9 @@ export default function ZakatFitrahPage() {
         tahun_hijriah: '1446',
         keterangan: ''
       });
+      
+      // Fetch fresh data in background to ensure consistency
+      setTimeout(() => fetchZakatFitrah(false), 500);
     } catch (error: any) {
       console.error('Error creating zakat fitrah:', error);
       setError(error.message || 'Gagal menyimpan data zakat fitrah');
@@ -159,20 +198,46 @@ export default function ZakatFitrahPage() {
   const confirmDelete = async () => {
     if (!deleteId) return;
     
+    const zakatToDelete = zakatList.find(zakat => zakat.id === deleteId);
+    
     try {
+      // Optimistic update - remove from UI immediately
+      setZakatList(prevList => prevList.filter(zakat => zakat.id !== deleteId));
+      
+      setShowDeleteDialog(false);
+      setDeleteId(null);
+      
       const response = await fetch(`/api/zakat-fitrah/${deleteId}`, {
         method: 'DELETE',
+        cache: 'no-store'
       });
       
       if (response.ok) {
-        await fetchZakatFitrah();
-        setShowDeleteDialog(false);
-        setDeleteId(null);
+        setSuccess('Data zakat fitrah berhasil dihapus!');
+        // Fetch fresh data in background to ensure consistency
+        setTimeout(() => fetchZakatFitrah(false), 500);
       } else {
-        console.error('Failed to delete zakat fitrah');
+        // Failed - revert optimistic updates
+        if (zakatToDelete) {
+          setZakatList(prevList => [zakatToDelete, ...prevList].sort((a, b) => 
+            new Date(b.tanggal_bayar).getTime() - new Date(a.tanggal_bayar).getTime()
+          ));
+        }
+        
+        const errorData = await response.json();
+        setError(`Error: ${errorData.error || 'Failed to delete zakat fitrah'}`);
       }
     } catch (error) {
       console.error('Error deleting zakat fitrah:', error);
+      
+      // Network error - revert optimistic updates
+      if (zakatToDelete) {
+        setZakatList(prevList => [zakatToDelete, ...prevList].sort((a, b) => 
+          new Date(b.tanggal_bayar).getTime() - new Date(a.tanggal_bayar).getTime()
+        ));
+      }
+      
+      setError('Network error. Please try again.');
     }
   };
 

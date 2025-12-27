@@ -60,20 +60,34 @@ export default function KasHarianPage() {
     fetchKasHarian();
   }, []);
 
-  const fetchKasHarian = async () => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
-
+  const fetchKasHarian = async (showLoadingIndicator = true) => {
+    if (showLoadingIndicator) {
+      setLoading(true);
+    }
+    
     try {
+      // Ultra-fast fetch with minimal timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 detik timeout
+
       const response = await fetch('/api/kas-harian', {
         signal: controller.signal,
-        cache: 'no-store'
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, max-age=0',
+          'Pragma': 'no-cache'
+        }
       });
       
       clearTimeout(timeoutId);
       
+      if (response.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
+      
       if (!response.ok) {
-        throw new Error(`Failed to fetch kas harian: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
@@ -81,23 +95,47 @@ export default function KasHarianPage() {
       const saldo = parseFloat(data.currentSaldo?.toString()) || 0;
       setCurrentSaldo(isNaN(saldo) ? 0 : saldo);
     } catch (error: any) {
-      clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
         console.error('Request timeout:', error);
-        alert('Request timeout. Coba lagi nanti.');
+        if (showLoadingIndicator) {
+          alert('Koneksi lambat. Silakan coba lagi.');
+        }
       } else {
         console.error('Error fetching kas harian:', error);
-        alert('Gagal memuat data kas. Silakan coba lagi.');
+        if (showLoadingIndicator) {
+          alert('Gagal memuat data. Silakan coba lagi.');
+          setKasList([]);
+          setCurrentSaldo(0);
+        }
       }
-      setKasList([]);
-      setCurrentSaldo(0);
     } finally {
-      setLoading(false);
+      if (showLoadingIndicator) {
+        setLoading(false);
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Show immediate feedback
+    const tempId = Date.now();
+    const tempKas = {
+      id: tempId,
+      ...formData,
+      saldo_sebelum: currentSaldo,
+      saldo_sesudah: formData.jenis_transaksi === 'masuk' 
+        ? currentSaldo + formData.jumlah 
+        : currentSaldo - formData.jumlah,
+      created_at: new Date().toISOString()
+    };
+    
+    // INSTANT UI UPDATE
+    setKasList(prevList => [tempKas as any, ...prevList]);
+    setCurrentSaldo(tempKas.saldo_sesudah);
+    setShowForm(false);
+    resetForm();
+    
     try {
       const response = await fetch('/api/kas-harian', {
         method: 'POST',
@@ -105,15 +143,38 @@ export default function KasHarianPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        cache: 'no-store'
       });
 
       if (response.ok) {
-        await fetchKasHarian();
-        setShowForm(false);
-        resetForm();
+        // Replace temp data with real data
+        const newKas = await response.json();
+        setKasList(prevList => 
+          prevList.map(kas => kas.id === tempId ? newKas : kas)
+        );
+      } else {
+        // Revert on error
+        setKasList(prevList => prevList.filter(kas => kas.id !== tempId));
+        if (formData.jenis_transaksi === 'masuk') {
+          setCurrentSaldo(prev => prev - formData.jumlah);
+        } else {
+          setCurrentSaldo(prev => prev + formData.jumlah);
+        }
+        
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error || 'Failed to create transaction'}`);
       }
     } catch (error) {
+      // Revert on network error
+      setKasList(prevList => prevList.filter(kas => kas.id !== tempId));
+      if (formData.jenis_transaksi === 'masuk') {
+        setCurrentSaldo(prev => prev - formData.jumlah);
+      } else {
+        setCurrentSaldo(prev => prev + formData.jumlah);
+      }
+      
       console.error('Error creating kas harian:', error);
+      alert('Network error. Please try again.');
     }
   };
 
@@ -153,20 +214,71 @@ export default function KasHarianPage() {
   const confirmDelete = async () => {
     if (!deleteId) return;
     
+    setLoading(true);
+    const kasToDelete = kasList.find(kas => kas.id === deleteId);
+    
     try {
+      // Optimistic update - remove from UI immediately
+      setKasList(prevList => prevList.filter(kas => kas.id !== deleteId));
+      
+      // Update saldo immediately
+      if (kasToDelete) {
+        if (kasToDelete.jenis_transaksi === 'masuk') {
+          setCurrentSaldo(prev => prev - kasToDelete.jumlah);
+        } else {
+          setCurrentSaldo(prev => prev + kasToDelete.jumlah);
+        }
+      }
+      
+      setShowDeleteDialog(false);
+      setDeleteId(null);
+      
       const response = await fetch(`/api/kas-harian/${deleteId}`, {
         method: 'DELETE',
+        cache: 'no-store'
       });
       
       if (response.ok) {
-        await fetchKasHarian();
-        setShowDeleteDialog(false);
-        setDeleteId(null);
+        // Success - fetch fresh data to ensure consistency
+        setTimeout(() => fetchKasHarian(), 500);
       } else {
-        console.error('Failed to delete kas harian');
+        // Failed - revert optimistic updates
+        if (kasToDelete) {
+          setKasList(prevList => [kasToDelete, ...prevList].sort((a, b) => 
+            new Date(b.tanggal + ' ' + b.created_at).getTime() - 
+            new Date(a.tanggal + ' ' + a.created_at).getTime()
+          ));
+          
+          if (kasToDelete.jenis_transaksi === 'masuk') {
+            setCurrentSaldo(prev => prev + kasToDelete.jumlah);
+          } else {
+            setCurrentSaldo(prev => prev - kasToDelete.jumlah);
+          }
+        }
+        
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error || 'Failed to delete transaction'}`);
       }
     } catch (error) {
       console.error('Error deleting kas harian:', error);
+      
+      // Network error - revert optimistic updates
+      if (kasToDelete) {
+        setKasList(prevList => [kasToDelete, ...prevList].sort((a, b) => 
+          new Date(b.tanggal + ' ' + b.created_at).getTime() - 
+          new Date(a.tanggal + ' ' + a.created_at).getTime()
+        ));
+        
+        if (kasToDelete.jenis_transaksi === 'masuk') {
+          setCurrentSaldo(prev => prev + kasToDelete.jumlah);
+        } else {
+          setCurrentSaldo(prev => prev - kasToDelete.jumlah);
+        }
+      }
+      
+      alert('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

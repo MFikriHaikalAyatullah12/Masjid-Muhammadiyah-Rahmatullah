@@ -1,12 +1,21 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
+import OptimizedLoader from './OptimizedLoader';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/register';
+  const [isPageLoading, setIsPageLoading] = useState(false);
+  
+  // Track route changes for instant feedback
+  useEffect(() => {
+    setIsPageLoading(true);
+    const timer = setTimeout(() => setIsPageLoading(false), 200);
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   if (isAuthPage) {
     return <>{children}</>;
@@ -55,20 +64,20 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       </div>
       
       <Sidebar />
+      
+      {/* Instant loading overlay */}
+      {isPageLoading && (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center lg:pl-64">
+          <OptimizedLoader />
+        </div>
+      )}
+      
       <main className="lg:pl-64 pt-16 lg:pt-0 relative z-10">
         <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-7xl mx-auto">
-          <Suspense fallback={
-            <div className="flex items-center justify-center min-h-[180px] animate-pulse">
-              <div className="text-center space-y-2">
-                <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-green-600 border-t-transparent gpu-accelerated" style={{ animationDuration: '0.6s' }}></div>
-                <p className="text-sm text-gray-600 font-medium animate-pulse" style={{ animationDuration: '1s' }}>Memuat...</p>
-                <div className="w-20 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">
-                  <div className="h-full bg-green-600 rounded-full animate-pulse-fast" style={{ animationDuration: '0.8s' }}></div>
-                </div>
-              </div>
+          <Suspense fallback={<OptimizedLoader />}>
+            <div className={`transition-opacity duration-200 ${isPageLoading ? 'opacity-50' : 'opacity-100'}`}>
+              {children}
             </div>
-          }>
-            {children}
           </Suspense>
         </div>
       </main>
