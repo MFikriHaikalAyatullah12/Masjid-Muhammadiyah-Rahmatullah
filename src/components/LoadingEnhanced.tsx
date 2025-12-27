@@ -70,19 +70,23 @@ export default function Loading({
   }
 
   const spinnerContent = (
-    <div className="flex flex-col items-center justify-center gap-3">
+    <div className="flex flex-col items-center justify-center gap-2">
       <div 
-        className={`animate-spin rounded-full border-2 sm:border-4 border-emerald-200 border-t-emerald-600 ${sizeClasses[size]}`}
+        className={`animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600 ${sizeClasses[size]} gpu-accelerated`}
         role="status"
         aria-label="Loading"
+        style={{ animationDuration: '0.6s' }}
       >
         <span className="sr-only">Loading...</span>
       </div>
       {text && (
-        <p className={`${textSizeClasses[size]} text-gray-600 text-center font-medium max-w-xs`}>
+        <p className={`${textSizeClasses[size]} text-gray-600 text-center font-medium max-w-xs animate-pulse`} style={{ animationDuration: '1s' }}>
           {text}
         </p>
       )}
+      <div className="w-16 h-1 bg-emerald-100 rounded-full overflow-hidden">
+        <div className="h-full bg-emerald-600 rounded-full animate-pulse-fast" style={{ animationDuration: '0.8s' }}></div>
+      </div>
     </div>
   );
 
@@ -97,7 +101,7 @@ export default function Loading({
   }
 
   return (
-    <div className={`flex items-center justify-center p-4 min-h-[150px] sm:min-h-[200px] ${className}`}>
+    <div className={`flex items-center justify-center p-3 min-h-[120px] ${className}`}>
       {spinnerContent}
     </div>
   );

@@ -3,6 +3,163 @@ import jsPDF from 'jspdf';
 import pool from '@/lib/db';
 import { getUserFromToken } from '@/lib/auth';
 
+// Helper function to format currency
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+// Helper function to format date
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+};
+
+async function generateTabunganQurbanPDF(user: any) {
+  const client = await pool.connect();
+  
+  try {
+    // Check if user_id column exists first
+    const columnCheck = await client.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'tabungan_qurban' 
+      AND column_name = 'user_id'
+    `);
+    
+    const hasUserIdColumn = columnCheck.rows.length > 0;
+    const userFilter = hasUserIdColumn ? 'WHERE tq.user_id = $1' : '';
+    const queryParams = hasUserIdColumn ? [user.userId] : [];
+
+    // Get tabungan qurban data
+    const tabunganResult = await client.query(`
+      SELECT 
+        tq.nama_penabung,
+        tq.alamat,
+        tq.total_terkumpul,
+        tq.target_tabungan,
+        tq.jenis_hewan,
+        tq.status,
+        COUNT(cq.id) as total_transaksi,
+        COALESCE(SUM(cq.jumlah), 0) as total_setor
+      FROM tabungan_qurban tq
+      LEFT JOIN cicilan_qurban cq ON cq.tabungan_id = tq.id
+      ${userFilter}
+      GROUP BY tq.id, tq.nama_penabung, tq.alamat, tq.total_terkumpul, tq.target_tabungan, tq.jenis_hewan, tq.status
+      ORDER BY tq.nama_penabung ASC
+    `, queryParams);
+
+    // Get summary
+    const summaryResult = await client.query(`
+      SELECT 
+        COUNT(DISTINCT tq.id) as total_penabung,
+        COUNT(cq.id) as total_transaksi,
+        COALESCE(SUM(cq.jumlah), 0) as total_setor,
+        COALESCE(SUM(tq.total_terkumpul), 0) as total_saldo
+      FROM tabungan_qurban tq
+      LEFT JOIN cicilan_qurban cq ON cq.tabungan_id = tq.id
+      ${userFilter}
+    `, queryParams);
+
+    const summary = summaryResult.rows[0];
+    const tabunganData = tabunganResult.rows;
+
+    // Create PDF
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(16);
+    doc.text('LAPORAN TABUNGAN QURBAN', 105, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text('Masjid Muhammadiyah Rahmatullah', 105, 30, { align: 'center' });
+    doc.text(`Tanggal Cetak: ${formatDate(new Date().toISOString())}`, 105, 40, { align: 'center' });
+
+    let y = 55;
+
+    // Summary
+    doc.setFontSize(12);
+    doc.text('RINGKASAN:', 25, y);
+    y += 10;
+
+    doc.setFontSize(10);
+    doc.text(`Total Penabung: ${summary.total_penabung}`, 30, y);
+    y += 8;
+    doc.text(`Total Transaksi: ${summary.total_transaksi}`, 30, y);
+    y += 8;
+    doc.text(`Total Setoran: ${formatCurrency(parseFloat(summary.total_setor))}`, 30, y);
+    y += 8;
+    doc.text(`Total Saldo: ${formatCurrency(parseFloat(summary.total_saldo))}`, 30, y);
+    y += 15;
+
+    // Table header
+    doc.setFontSize(12);
+    doc.text('DETAIL PENABUNG:', 25, y);
+    y += 10;
+
+    // Create table
+    const headers = ['No', 'Nama Penabung', 'Alamat', 'Total Setor', 'Target', 'Progress'];
+    const columnWidths = [15, 40, 40, 30, 30, 25];
+    let x = 25;
+
+    // Draw table headers
+    doc.setFontSize(9);
+    for (let i = 0; i < headers.length; i++) {
+      doc.rect(x, y, columnWidths[i], 8);
+      doc.text(headers[i], x + 2, y + 6);
+      x += columnWidths[i];
+    }
+    y += 8;
+
+    // Draw table rows
+    tabunganData.forEach((row, index) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 30;
+      }
+
+      x = 25;
+      const values = [
+        (index + 1).toString(),
+        row.nama_penabung,
+        row.alamat || '-',
+        formatCurrency(parseFloat(row.total_setor)),
+        formatCurrency(parseFloat(row.target_tabungan)),
+        `${Math.round((parseFloat(row.total_terkumpul) / parseFloat(row.target_tabungan)) * 100)}%`
+      ];
+
+      for (let i = 0; i < values.length; i++) {
+        doc.rect(x, y, columnWidths[i], 8);
+        const text = values[i] || '-';
+        const textWidth = doc.getTextWidth(text);
+        const textX = i === 0 ? x + (columnWidths[i] - textWidth) / 2 : x + 2;
+        doc.text(text, textX, y + 6);
+        x += columnWidths[i];
+      }
+      y += 8;
+    });
+
+    const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+    
+    return new NextResponse(pdfBuffer, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="laporan-tabungan-qurban.pdf"`,
+      },
+    });
+
+  } finally {
+    client.release();
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getUserFromToken();
@@ -11,6 +168,12 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const jenis = searchParams.get('jenis');
+    
+    if (jenis === 'tabungan-qurban') {
+      return generateTabunganQurbanPDF(user);
+    }
+
     const dari = searchParams.get('dari') || '2024-01-01';
     const sampai = searchParams.get('sampai') || new Date().toISOString().split('T')[0];
 
@@ -51,6 +214,22 @@ export async function GET(request: NextRequest) {
           WHERE user_id = $1 AND tanggal_bayar BETWEEN $2 AND $3
         `, [user.userId, dari, sampai]),
         
+        // Donatur Bulanan - TAMBAHAN BARU
+        client.query(`
+          SELECT SUM(pd.jumlah) as total
+          FROM pembayaran_donatur pd
+          JOIN donatur_bulanan db ON pd.donatur_id = db.id
+          WHERE db.user_id = $1 AND pd.tanggal_bayar BETWEEN $2 AND $3
+        `, [user.userId, dari, sampai]),
+        
+        // Tabungan Qurban
+        client.query(`
+          SELECT SUM(cq.jumlah) as total
+          FROM cicilan_qurban cq
+          JOIN tabungan_qurban tq ON cq.tabungan_id = tq.id
+          WHERE tq.user_id = $1 AND cq.tanggal_bayar BETWEEN $2 AND $3
+        `, [user.userId, dari, sampai]),
+        
         // Pengeluaran berdasarkan kategori
         client.query(`
           SELECT kategori, SUM(jumlah) as total
@@ -80,12 +259,14 @@ export async function GET(request: NextRequest) {
       ]);
 
       const [saldoSebelumResult, kasMasukResult, zakatFitrahResult, zakatMalResult, 
-             pengeluaranResult, kasKeluarResult, saldoAkhirResult] = queries;
+             donaturResult, tabunganResult, pengeluaranResult, kasKeluarResult, saldoAkhirResult] = queries;
 
       const saldoSebelum = saldoSebelumResult.rows[0]?.saldo || 0;
       const kasMasuk = kasMasukResult.rows;
       const zakatFitrah = zakatFitrahResult.rows[0]?.total || 0;
       const zakatMal = zakatMalResult.rows[0]?.total || 0;
+      const donatur = donaturResult.rows[0]?.total || 0;
+      const tabungan = tabunganResult.rows[0]?.total || 0;
       const pengeluaranKategori = pengeluaranResult.rows;
       const kasKeluarKategori = kasKeluarResult.rows;
       const saldoAkhir = saldoAkhirResult.rows[0]?.saldo || 0;
@@ -142,13 +323,63 @@ export async function GET(request: NextRequest) {
       kasMasuk.forEach(item => {
         const kategori = item.kategori.toUpperCase().replace(/_/g, ' ');
         const total = parseFloat(item.total);
-        doc.text(`${counter}. ${kategori}`, 25, y);
+        doc.text(`${counter}. KAS ${kategori}`, 25, y);
         doc.text(': ', 125, y);
         doc.text(formatRupiah(total), 170, y, { align: 'right' });
         totalPemasukan += total;
         y += 8;
         counter++;
       });
+      
+      // Zakat Fitrah (jika ada)
+      if (zakatFitrah > 0) {
+        doc.text(`${counter}. ZAKAT FITRAH`, 25, y);
+        doc.text(': ', 125, y);
+        doc.text(formatRupiah(zakatFitrah), 170, y, { align: 'right' });
+        totalPemasukan += parseFloat(String(zakatFitrah));
+        y += 8;
+        counter++;
+      }
+      
+      // Zakat Mal (jika ada)
+      if (zakatMal > 0) {
+        doc.text(`${counter}. ZAKAT MAL`, 25, y);
+        doc.text(': ', 125, y);
+        doc.text(formatRupiah(zakatMal), 170, y, { align: 'right' });
+        totalPemasukan += parseFloat(String(zakatMal));
+        y += 8;
+        counter++;
+      }
+      
+      // Donatur Bulanan (jika ada)
+      if (donatur > 0) {
+        doc.text(`${counter}. DONATUR BULANAN`, 25, y);
+        doc.text(': ', 125, y);
+        doc.text(formatRupiah(donatur), 170, y, { align: 'right' });
+        totalPemasukan += parseFloat(String(donatur));
+        y += 8;
+        counter++;
+      }
+      
+      // Tabungan Qurban (jika ada)
+      if (tabungan > 0) {
+        doc.text(`${counter}. TABUNGAN QURBAN`, 25, y);
+        doc.text(': ', 125, y);
+        doc.text(formatRupiah(tabungan), 170, y, { align: 'right' });
+        totalPemasukan += parseFloat(String(tabungan));
+        y += 8;
+        counter++;
+      }
+      
+      // Tabungan Qurban (jika ada)
+      if (tabungan > 0) {
+        doc.text(`${counter}. TABUNGAN QURBAN`, 25, y);
+        doc.text(': ', 125, y);
+        doc.text(formatRupiah(tabungan), 170, y, { align: 'right' });
+        totalPemasukan += parseFloat(String(tabungan));
+        y += 8;
+        counter++;
+      }
 
       // Zakat Fitrah (data real dari web)
       if (zakatFitrah > 0) {

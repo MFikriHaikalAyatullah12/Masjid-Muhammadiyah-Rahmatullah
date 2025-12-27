@@ -98,94 +98,164 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Header */}
-      <div className="mb-6 md:mb-8">
-        <div className="bg-slate-100/80 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200/60 p-6 md:p-8">
-          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-            {/* Logo Masjid */}
-            <div className="flex-shrink-0">
-              <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
-                <Building className="w-10 h-10 md:w-12 md:h-12 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-amber-50">
+      {/* Islamic Header with Mosque Pattern */}
+      <div className="relative mb-8">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-r from-teal-600 via-teal-700 to-amber-600 opacity-90">
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M30 30l15-15v30l-15-15zM15 15l15 15-15 15V15z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }} />
+        </div>
+        
+        <div className="relative px-6 py-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8">
+              {/* Bismillah */}
+              <div className="mb-6">
+                <p className="text-white/90 text-lg font-arabic mb-2">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+                <p className="text-white/70 text-sm italic">"Dengan menyebut nama Allah Yang Maha Pemurah lagi Maha Penyayang"</p>
               </div>
-            </div>
-            
-            {/* Title and Description */}
-            <div className="text-center md:text-left flex-grow">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                Sistem Administrasi Masjid
-              </h1>
-              <p className="text-sm md:text-base text-gray-600">
-                Selamat datang di sistem manajemen zakat dan keuangan masjid
+              
+              {/* Main Title */}
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
+                  <Building className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                    Sistem Administrasi Masjid
+                  </h1>
+                  <div className="h-1 w-32 bg-gradient-to-r from-amber-300 to-amber-500 rounded-full mx-auto" />
+                </div>
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
+                  <Heart className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              
+              <p className="text-white/90 text-lg max-w-2xl mx-auto leading-relaxed">
+                Sistem Manajemen Zakat, Infaq, dan Shadaqah<br/>
+                <span className="text-white/70 text-base">Mengelola amanah umat dengan transparansi dan keberkahan</span>
               </p>
-            </div>
-            
-            {/* Decorative element */}
-            <div className="hidden lg:block flex-shrink-0">
-              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                <Heart className="w-6 h-6 text-emerald-600" />
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Stats Grid - Mobile First */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-        <StatCard
-          title="Total Zakat Fitrah"
-          value={formatCurrency(stats?.zakatFitrah?.total || 0)}
-          count={`${stats?.zakatFitrah?.count || 0} muzakki`}
-          icon={<Heart className="w-5 h-5 md:w-6 md:h-6" />}
-          color="emerald"
-        />
-        
-        <StatCard
-          title="Total Zakat Mal"
-          value={formatCurrency(stats?.zakatMal?.total || 0)}
-          count={`${stats?.zakatMal?.count || 0} muzakki`}
-          icon={<Wallet className="w-5 h-5 md:w-6 md:h-6" />}
-          color="blue"
-        />
-        
-        <StatCard
-          title="Saldo Kas Saat Ini"
-          value={formatCurrency(stats?.currentSaldo || 0)}
-          count="Kas Masjid"
-          icon={<TrendingUp className="w-5 h-5 md:w-6 md:h-6" />}
-          color="green"
-        />
-        
-        <StatCard
-          title="Total Pengeluaran"
-          value={formatCurrency(stats?.pengeluaran?.total || 0)}
-          count={`${stats?.pengeluaran?.count || 0} transaksi`}
-          icon={<TrendingDown className="w-5 h-5 md:w-6 md:h-6" />}
-          color="red"
-        />
-        
-        <StatCard
-          title="Total Distribusi"
-          value={formatCurrency(stats?.distribusi?.total || 0)}
-          count={`${stats?.distribusi?.count || 0} penerima`}
-          icon={<Users className="w-5 h-5 md:w-6 md:h-6" />}
-          color="purple"
-        />
+      {/* Islamic Stats Cards */}
+      <div className="px-6 mb-12">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Title */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Laporan Keuangan Terkini</h2>
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-px w-12 bg-teal-300" />
+              <div className="w-2 h-2 bg-teal-500 rounded-full" />
+              <div className="h-px w-12 bg-teal-300" />
+            </div>
+          </div>
+          
+          {/* Main Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {/* Zakat Cards */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <StatCard
+                title="Zakat Fitrah"
+                value={formatCurrency(stats?.zakatFitrah?.total || 0)}
+                count={`${stats?.zakatFitrah?.count || 0} muzakki berkah`}
+                icon={<Heart className="w-6 h-6" />}
+                color="teal"
+              />
+              
+              <StatCard
+                title="Zakat Mal"
+                value={formatCurrency(stats?.zakatMal?.total || 0)}
+                count={`${stats?.zakatMal?.count || 0} muzakki dermawan`}
+                icon={<Wallet className="w-6 h-6" />}
+                color="amber"
+              />
+            </div>
+            
+            {/* Kas Card - Larger */}
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl p-8 text-white shadow-xl">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                  <TrendingUp className="w-8 h-8 text-white" />
+                </div>
+                <p className="text-emerald-100 text-sm mb-2">Saldo Kas Masjid</p>
+                <p className="text-3xl font-bold mb-1">{formatCurrency(stats?.currentSaldo || 0)}</p>
+                <p className="text-emerald-200 text-sm">Amanah Umat</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Secondary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <StatCard
+              title="Total Pengeluaran"
+              value={formatCurrency(stats?.pengeluaran?.total || 0)}
+              count={`${stats?.pengeluaran?.count || 0} kegiatan masjid`}
+              icon={<TrendingDown className="w-6 h-6" />}
+              color="rose"
+            />
+            
+            <StatCard
+              title="Dana Tersalurkan"
+              value={formatCurrency(stats?.distribusi?.total || 0)}
+              count={`${stats?.distribusi?.count || 0} mustahiq terbantu`}
+              icon={<Users className="w-6 h-6" />}
+              color="purple"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="mb-6 md:mb-8">
-        <DashboardCharts />
+      {/* Charts & Analytics */}
+      <div className="px-2 sm:px-4 lg:px-6 mb-6 sm:mb-8 lg:mb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100/60 overflow-hidden">
+            <div className="bg-gradient-to-r from-teal-600 to-amber-600 p-3 sm:p-4 lg:p-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white">Analisis Keuangan</h3>
+                  <p className="text-white/80 text-xs sm:text-sm">Grafik pemasukan dan pengeluaran bulanan</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 sm:p-4 lg:p-6">
+              <DashboardCharts />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Recent Transactions */}
-      <div className="bg-slate-100/80 backdrop-blur-sm rounded-lg shadow-sm border border-slate-200/60">
-        <div className="px-4 md:px-6 py-4 md:py-6 border-b border-slate-200/60">
-          <h2 className="text-lg md:text-xl font-semibold text-gray-900">Transaksi Terbaru</h2>
-          <p className="text-sm text-gray-600 mt-1">Aktivitas keuangan terkini</p>
-        </div>
-        <div className="p-4 md:p-6">
-          <RecentTransactions transactions={stats?.recentTransactions || []} />
+      <div className="px-2 sm:px-4 lg:px-6 mb-4 sm:mb-6 lg:mb-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100/60 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-3 sm:p-4 lg:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <Building className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white">Aktivitas Terbaru</h3>
+                    <p className="text-white/80 text-xs sm:text-sm hidden sm:block">Transaksi dan kegiatan masjid hari ini</p>
+                  </div>
+                </div>
+                <div className="text-white/60 text-xs hidden md:block">
+                  Update terakhir: {new Date().toLocaleDateString('id-ID')}
+                </div>
+              </div>
+            </div>
+            <div className="p-3 sm:p-4 lg:p-6">
+              <RecentTransactions transactions={stats?.recentTransactions || []} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

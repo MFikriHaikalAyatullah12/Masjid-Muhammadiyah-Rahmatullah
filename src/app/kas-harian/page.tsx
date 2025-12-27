@@ -61,17 +61,34 @@ export default function KasHarianPage() {
   }, []);
 
   const fetchKasHarian = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
+
     try {
-      const response = await fetch('/api/kas-harian');
+      const response = await fetch('/api/kas-harian', {
+        signal: controller.signal,
+        cache: 'no-store'
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch kas harian');
+        throw new Error(`Failed to fetch kas harian: ${response.status}`);
       }
+      
       const data = await response.json();
       setKasList(Array.isArray(data.data) ? data.data : []);
       const saldo = parseFloat(data.currentSaldo?.toString()) || 0;
       setCurrentSaldo(isNaN(saldo) ? 0 : saldo);
-    } catch (error) {
-      console.error('Error fetching kas harian:', error);
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        console.error('Request timeout:', error);
+        alert('Request timeout. Coba lagi nanti.');
+      } else {
+        console.error('Error fetching kas harian:', error);
+        alert('Gagal memuat data kas. Silakan coba lagi.');
+      }
       setKasList([]);
       setCurrentSaldo(0);
     } finally {

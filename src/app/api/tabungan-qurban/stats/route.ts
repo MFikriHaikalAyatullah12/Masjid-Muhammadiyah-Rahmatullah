@@ -24,8 +24,9 @@ export async function GET(request: NextRequest) {
           COALESCE(SUM(target_tabungan), 0) as target_total,
           COUNT(CASE WHEN status = 'menabung' THEN 1 END) as tabungan_aktif
         FROM tabungan_qurban
+        WHERE user_id = $1
       `;
-      const statsResult = await client.query(statsQuery);
+      const statsResult = await client.query(statsQuery, [user.userId]);
       const stats = statsResult.rows[0];
 
       // Get status distribution
@@ -34,10 +35,11 @@ export async function GET(request: NextRequest) {
           status,
           COUNT(*) as count
         FROM tabungan_qurban
+        WHERE user_id = $1
         GROUP BY status
         ORDER BY count DESC
       `;
-      const statusResult = await client.query(statusQuery);
+      const statusResult = await client.query(statusQuery, [user.userId]);
       
       const totalTabungan = parseInt(stats.total_tabungan) || 0;
       const statusDistribution = statusResult.rows.map(row => {
@@ -71,10 +73,11 @@ export async function GET(request: NextRequest) {
             ELSE 0
           END as persentase
         FROM tabungan_qurban 
+        WHERE user_id = $1
         ORDER BY persentase DESC, total_terkumpul DESC
         LIMIT 10
       `;
-      const progressResult = await client.query(progressQuery);
+      const progressResult = await client.query(progressQuery, [user.userId]);
       
       const progressData = progressResult.rows.map(row => ({
         nama: row.nama || 'Tidak diketahui',

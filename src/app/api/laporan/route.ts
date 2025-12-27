@@ -7,9 +7,14 @@ const pool = new Pool({
 });
 
 export async function GET(request: NextRequest) {
+  const timeout = setTimeout(() => {
+    throw new Error('Request timeout');
+  }, 15000);
+
   try {
     const user = await getUserFromToken();
     if (!user) {
+      clearTimeout(timeout);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -18,62 +23,94 @@ export async function GET(request: NextRequest) {
     const sampai = searchParams.get('sampai') || new Date().toISOString().split('T')[0];
 
     const client = await pool.connect();
+    client.query('SET statement_timeout = 10000'); // 10 second timeout
 
     try {
-      // Zakat Fitrah
-      const zakatFitrahQuery = `
-        SELECT 
-          COUNT(*) as count,
-          COALESCE(SUM(total_rupiah), 0) as total_uang,
-          COALESCE(SUM(CASE WHEN jenis_bayar != 'uang' THEN jumlah_bayar ELSE 0 END), 0) as total_beras
-        FROM zakat_fitrah 
-        WHERE tanggal_bayar BETWEEN $1 AND $2 AND user_id = $3
-      `;
-      const zakatFitrahResult = await client.query(zakatFitrahQuery, [dari, sampai, user.userId]);
+      // Jalankan semua query secara paralel untuk mempercepat response
+      const [
+        zakatFitrahResult,
+        zakatMalResult,
+        kasResult,
+        saldoResult,
+        pengeluaranResult,
+        donaturResult,
+        tabunganResult
+      ] = await Promise.all([
+        // Zakat Fitrah
+        client.query(`
+          SELECT 
+            COUNT(*) as count,
+            COALESCE(SUM(total_rupiah), 0) as total_uang,
+            COALESCE(SUM(CASE WHEN jenis_bayar != 'uang' THEN jumlah_bayar ELSE 0 END), 0) as total_beras
+          FROM zakat_fitrah 
+          WHERE tanggal_bayar BETWEEN $1 AND $2 AND user_id = $3
+        `, [dari, sampai, user.userId]),
+        
+        // Zakat Mal
+        client.query(`
+          SELECT 
+            COUNT(*) as count,
+            COALESCE(SUM(jumlah_zakat), 0) as total
+          FROM zakat_mal 
+          WHERE tanggal_bayar BETWEEN $1 AND $2 AND user_id = $3
+        `, [dari, sampai, user.userId]),
+        
+        // Kas Harian
+        client.query(`
+          SELECT 
+            COALESCE(SUM(CASE WHEN jenis_transaksi = 'masuk' THEN jumlah ELSE 0 END), 0) as pemasukan,
+            COALESCE(SUM(CASE WHEN jenis_transaksi = 'keluar' THEN jumlah ELSE 0 END), 0) as pengeluaran
+          FROM kas_harian 
+          WHERE tanggal BETWEEN $1 AND $2 AND user_id = $3
+        `, [dari, sampai, user.userId]),
+        
+        // Saldo akhir
+        client.query(`
+          SELECT COALESCE(saldo_sesudah, 0) as saldo
+          FROM kas_harian
+          WHERE user_id = $1 AND tanggal <= $2
+          ORDER BY tanggal DESC, created_at DESC
+          LIMIT 1
+        `, [user.userId, sampai]),
+        
+        // Pengeluaran
+        client.query(`
+          SELECT 
+            COALESCE(SUM(jumlah), 0) as total_pengeluaran
+          FROM pengeluaran 
+          WHERE tanggal BETWEEN $1 AND $2 AND user_id = $3
+        `, [dari, sampai, user.userId]),
+        
+        // Donatur Bulanan
+        client.query(`
+          SELECT 
+            COUNT(DISTINCT pd.id) as count,
+            COALESCE(SUM(pd.jumlah), 0) as total
+          FROM pembayaran_donatur pd
+          JOIN donatur_bulanan db ON pd.donatur_id = db.id
+          WHERE pd.tanggal_bayar BETWEEN $1 AND $2 AND db.user_id = $3
+        `, [dari, sampai, user.userId]),
+        
+        // Tabungan Qurban
+        client.query(`
+          SELECT 
+            COUNT(*) as count,
+            COALESCE(SUM(cq.jumlah), 0) as total_setor,
+            0 as total_tarik
+          FROM cicilan_qurban cq
+          JOIN tabungan_qurban tq ON cq.tabungan_id = tq.id
+          WHERE tq.user_id = $1 AND cq.tanggal_bayar BETWEEN $2 AND $3
+        `, [user.userId, dari, sampai])
+      ]);
+      
+      // Extract data dari result
       const zakatFitrah = zakatFitrahResult.rows[0];
-
-      // Zakat Mal
-      const zakatMalQuery = `
-        SELECT 
-          COUNT(*) as count,
-          COALESCE(SUM(jumlah_zakat), 0) as total
-        FROM zakat_mal 
-        WHERE tanggal_bayar BETWEEN $1 AND $2 AND user_id = $3
-      `;
-      const zakatMalResult = await client.query(zakatMalQuery, [dari, sampai, user.userId]);
       const zakatMal = zakatMalResult.rows[0];
-
-      // Kas Harian
-      const kasQuery = `
-        SELECT 
-          COALESCE(SUM(CASE WHEN jenis_transaksi = 'masuk' THEN jumlah ELSE 0 END), 0) as pemasukan,
-          COALESCE(SUM(CASE WHEN jenis_transaksi = 'keluar' THEN jumlah ELSE 0 END), 0) as pengeluaran
-        FROM kas_harian 
-        WHERE tanggal BETWEEN $1 AND $2 AND user_id = $3
-      `;
-      const kasResult = await client.query(kasQuery, [dari, sampai, user.userId]);
       const kas = kasResult.rows[0];
-
-      // Saldo akhir dari kas_harian
-      const saldoQuery = `
-        SELECT COALESCE(saldo_sesudah, 0) as saldo
-        FROM kas_harian
-        WHERE user_id = $1 AND tanggal <= $2
-        ORDER BY tanggal DESC, created_at DESC
-        LIMIT 1
-      `;
-      const saldoResult = await client.query(saldoQuery, [user.userId, sampai]);
       const saldoAkhir = saldoResult.rows.length > 0 ? parseFloat(saldoResult.rows[0].saldo) : 0;
-
-      // Pengeluaran
-      const pengeluaranQuery = `
-        SELECT 
-          COALESCE(SUM(jumlah), 0) as total_pengeluaran
-        FROM pengeluaran 
-        WHERE tanggal BETWEEN $1 AND $2 AND user_id = $3
-      `;
-      const pengeluaranResult = await client.query(pengeluaranQuery, [dari, sampai, user.userId]);
       const pengeluaran = pengeluaranResult.rows[0];
+      const donatur = donaturResult.rows[0];
+      const tabungan = tabunganResult.rows[0];
 
       // Get distribusi data from pengeluaran table with status 'disetujui' and kategori 'distribusi zakat'
       let distribusi = { count: 0, total: 0 };
@@ -105,6 +142,15 @@ export async function GET(request: NextRequest) {
           total: parseFloat(zakatMal.total) || 0,
           count: parseInt(zakatMal.count) || 0
         },
+        donaturBulanan: {
+          total: parseFloat(donatur.total) || 0,
+          count: parseInt(donatur.count) || 0
+        },
+        tabunganQurban: {
+          totalSetor: parseFloat(tabungan.total_setor) || 0,
+          totalTarik: parseFloat(tabungan.total_tarik) || 0,
+          count: parseInt(tabungan.count) || 0
+        },
         kasHarian: {
           pemasukan: parseFloat(kas.pemasukan) || 0,
           pengeluaran: parseFloat(kas.pengeluaran) || 0,
@@ -119,11 +165,17 @@ export async function GET(request: NextRequest) {
         }
       };
 
-      return NextResponse.json(response);
+      return NextResponse.json(response, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=180, stale-while-revalidate=300'
+        }
+      });
     } finally {
+      clearTimeout(timeout);
       client.release();
     }
   } catch (error) {
+    clearTimeout(timeout);
     console.error('Error fetching laporan:', error);
     return NextResponse.json(
       { error: 'Gagal mengambil data laporan' },

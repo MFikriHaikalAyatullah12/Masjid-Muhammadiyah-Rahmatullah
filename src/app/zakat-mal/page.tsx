@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Wallet, Plus, Calculator, Trash2 } from 'lucide-react';
+import { formatRupiah, parseRupiah, handleCurrencyChange, displayRupiah } from '@/lib/currency';
 
 interface ZakatMal {
   id: number;
   nama_muzakki: string;
   alamat_muzakki: string;
-  no_telepon: string;
   jenis_harta: string;
   nilai_harta: number;
   nisab: number;
@@ -30,10 +30,9 @@ export default function ZakatMalPage() {
   const [formData, setFormData] = useState({
     nama_muzakki: '',
     alamat_muzakki: '',
-    no_telepon: '',
     jenis_harta: 'emas',
-    nilai_harta: 0,
-    nisab: 85000000, // 85 gram x 1 juta (harga emas per gram)
+    nilai_harta: '',
+    nisab: '85.000.000', // 85 gram x 1 juta (formatted)
     haul_terpenuhi: false,
     persentase_zakat: 2.5,
     tanggal_bayar: new Date().toISOString().split('T')[0],
@@ -75,12 +74,19 @@ export default function ZakatMalPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Convert formatted strings to numbers for API
+      const submitData = {
+        ...formData,
+        nilai_harta: parseRupiah(formData.nilai_harta),
+        nisab: parseRupiah(formData.nisab)
+      };
+      
       const response = await fetch('/api/zakat-mal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (response.ok) {
@@ -97,10 +103,9 @@ export default function ZakatMalPage() {
     setFormData({
       nama_muzakki: '',
       alamat_muzakki: '',
-      no_telepon: '',
       jenis_harta: 'emas',
-      nilai_harta: 0,
-      nisab: 85000000,
+      nilai_harta: '',
+      nisab: '85.000.000',
       haul_terpenuhi: false,
       persentase_zakat: 2.5,
       tanggal_bayar: new Date().toISOString().split('T')[0],
@@ -143,8 +148,11 @@ export default function ZakatMalPage() {
   };
 
   const calculateZakat = () => {
-    if (formData.nilai_harta >= formData.nisab && formData.haul_terpenuhi) {
-      return (formData.nilai_harta * formData.persentase_zakat) / 100;
+    const nilaiHarta = parseRupiah(formData.nilai_harta);
+    const nisabValue = parseRupiah(formData.nisab);
+    
+    if (nilaiHarta >= nisabValue && formData.haul_terpenuhi) {
+      return (nilaiHarta * formData.persentase_zakat) / 100;
     }
     return 0;
   };
@@ -180,8 +188,8 @@ export default function ZakatMalPage() {
     setFormData({
       ...formData,
       jenis_harta: calculator.jenis_harta,
-      nilai_harta,
-      nisab
+      nilai_harta: formatRupiah(nilai_harta),
+      nisab: formatRupiah(nisab)
     });
     setShowCalculator(false);
   };
@@ -402,30 +410,17 @@ export default function ZakatMalPage() {
               <div className="bg-white/60 backdrop-blur-sm rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-bold mb-4">Tambah Zakat Mal</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nama Muzakki *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.nama_muzakki}
-                        onChange={(e) => setFormData({...formData, nama_muzakki: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        No. Telepon
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.no_telepon}
-                        onChange={(e) => setFormData({...formData, no_telepon: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nama Muzakki *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.nama_muzakki}
+                      onChange={(e) => setFormData({...formData, nama_muzakki: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    />
                   </div>
                   
                   <div>
@@ -478,15 +473,12 @@ export default function ZakatMalPage() {
                         Nilai Harta (Rp) *
                       </label>
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
                         required
-                        value={formData.nilai_harta || ''}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value);
-                          setFormData({...formData, nilai_harta: value >= 0 ? value : 0});
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                        value={formData.nilai_harta}
+                        onChange={(e) => handleCurrencyChange(e, (value) => setFormData({...formData, nilai_harta: value}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-right font-mono"
+                        placeholder="0"
                       />
                     </div>
                     <div>
@@ -494,15 +486,12 @@ export default function ZakatMalPage() {
                         Nisab (Rp) *
                       </label>
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
                         required
-                        value={formData.nisab || ''}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value);
-                          setFormData({...formData, nisab: value >= 0 ? value : 0});
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                        value={formData.nisab}
+                        onChange={(e) => handleCurrencyChange(e, (value) => setFormData({...formData, nisab: value}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-right font-mono"
+                        placeholder="85.000.000"
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         {getNisabText(formData.jenis_harta)}
@@ -526,14 +515,14 @@ export default function ZakatMalPage() {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="text-sm text-gray-600">Jumlah Zakat:</div>
                     <div className="text-xl font-bold text-green-600">
-                      {formatCurrency(calculateZakat())}
+                      {displayRupiah(formatRupiah(calculateZakat()))}
                     </div>
                     {!formData.haul_terpenuhi && (
                       <p className="text-xs text-orange-600 mt-1">
                         Haul belum terpenuhi, zakat belum wajib dibayar
                       </p>
                     )}
-                    {formData.nilai_harta < formData.nisab && (
+                    {parseRupiah(formData.nilai_harta) < parseRupiah(formData.nisab) && (
                       <p className="text-xs text-orange-600 mt-1">
                         Nilai harta belum mencapai nisab
                       </p>
@@ -644,7 +633,6 @@ export default function ZakatMalPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">{zakat.nama_muzakki}</div>
-                        {zakat.no_telepon && <div className="text-sm text-gray-500">{zakat.no_telepon}</div>}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -698,7 +686,6 @@ export default function ZakatMalPage() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900 text-sm">{zakat.nama_muzakki}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{zakat.no_telepon}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
                       {zakat.jenis_harta}

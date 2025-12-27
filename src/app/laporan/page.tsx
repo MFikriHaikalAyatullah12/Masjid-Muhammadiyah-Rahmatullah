@@ -43,23 +43,45 @@ export default function LaporanPage() {
   };
 
   const fetchLaporan = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 detik timeout
+
     try {
       setLoading(true);
-      const response = await fetch(`/api/laporan?dari=${periode.dari}&sampai=${periode.sampai}`);
+      const response = await fetch(`/api/laporan?dari=${periode.dari}&sampai=${periode.sampai}`, {
+        signal: controller.signal,
+        cache: 'no-store'
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const data = await response.json();
         setLaporan(data);
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    } catch (error) {
-      console.error('Error fetching laporan:', error);
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        console.error('Request timeout:', error);
+        alert('Request timeout. Coba lagi nanti.');
+      } else {
+        console.error('Error fetching laporan:', error);
+        alert('Gagal memuat laporan. Silakan coba lagi.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLaporan();
-  }, [periode]);
+    const timeoutId = setTimeout(() => {
+      fetchLaporan();
+    }, 100); // Debounce untuk mencegah multiple calls saat typing
+
+    return () => clearTimeout(timeoutId);
+  }, [periode.dari, periode.sampai]);
 
   const handleDownloadPDF = async () => {
     try {

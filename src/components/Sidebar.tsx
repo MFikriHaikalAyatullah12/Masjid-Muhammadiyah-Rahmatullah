@@ -1,8 +1,6 @@
-'use client';
-
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { 
   LayoutDashboard, 
   Heart, 
@@ -17,7 +15,9 @@ import {
   Database,
   CalendarHeart,
   Sparkles,
-  LogOut
+  LogOut,
+  HandHeart,
+  Coins
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -30,22 +30,59 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Zakat Fitrah', href: '/zakat-fitrah', icon: Heart },
-  { name: 'Zakat Mal', href: '/zakat-mal', icon: Wallet },
-  { name: 'Donatur Bulanan', href: '/donatur-bulanan', icon: CalendarHeart },
+  { name: 'Zakat Mal', href: '/zakat-mal', icon: Coins },
+  { name: 'Donatur Bulanan', href: '/donatur-bulanan', icon: HandHeart },
   { name: 'Tabungan Qurban', href: '/tabungan-qurban', icon: Sparkles },
-  { name: 'Kas Harian', href: '/kas-harian', icon: Banknote },
+  { name: 'Kas Harian', href: '/kas-harian', icon: Wallet },
   { name: 'Pengeluaran', href: '/pengeluaran', icon: TrendingDown },
   { name: 'Mustahiq', href: '/mustahiq', icon: Users },
   { name: 'Laporan', href: '/laporan', icon: FileText },
+  { name: 'Laporan Tabungan', href: '/laporan/tabungan-qurban', icon: CalendarHeart },
   { name: 'Reset Database', href: '/reset', icon: Database, danger: true },
 ];
 
-export default function Sidebar() {
+// Optimized navigation item component
+const NavigationItem = memo(({ item, pathname, onClick }: { 
+  item: NavigationItem; 
+  pathname: string; 
+  onClick?: () => void;
+}) => {
+  const isActive = pathname === item.href;
+  const IconComponent = item.icon;
+  const isDanger = item.danger;
+  
+  return (
+    <Link
+      href={item.href}
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-4 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px] touch-manipulation gpu-accelerated ${
+        isActive
+          ? isDanger 
+            ? 'bg-red-50 text-red-600 shadow-sm border-l-4 border-red-500'
+            : 'bg-teal-50 text-teal-700 shadow-sm border-l-4 border-teal-500'
+          : isDanger
+            ? 'text-red-600 hover:bg-red-50 hover:shadow-sm'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm'
+      }`}
+      prefetch={true}
+    >
+      <IconComponent className="w-5 h-5 flex-shrink-0" />
+      <span className="truncate">{item.name}</span>
+      {isActive && !isDanger && (
+        <div className="w-2 h-2 bg-teal-400 rounded-full ml-auto" />
+      )}
+    </Link>
+  );
+});
+
+NavigationItem.displayName = 'NavigationItem';
+
+const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     if (!confirm('Yakin ingin keluar?')) return;
     
     try {
@@ -55,69 +92,60 @@ export default function Sidebar() {
     } catch (error) {
       console.error('Logout error:', error);
     }
-  };
+  }, [router]);
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
 
   const SidebarContent = () => (
     <>
-      <div className="flex h-16 items-center justify-center border-b border-gray-100 px-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
-            <Building className="w-4.5 h-4.5 text-white" />
-          </div>
-          <div>
-            <span className="text-sm font-semibold text-gray-800 block leading-tight">Sistem Administrasi</span>
-            <span className="text-xs text-emerald-600 leading-tight">Masjid</span>
+      <div className="relative">
+        {/* Header dengan gradient islami */}
+        <div className="bg-gradient-to-r from-teal-600 to-emerald-600 p-4">
+          <div className="text-center">
+            <h1 className="text-white font-bold text-base leading-tight mb-1">Sistem Administrasi</h1>
+            <h2 className="text-white font-bold text-base leading-tight mb-2">Masjid</h2>
+            <div className="h-px bg-white/30 my-3" />
+            <p className="text-white/70 text-xs italic">Masjid Muhammadiyah Rahmatullah</p>
           </div>
         </div>
       </div>
       
-      <nav className="mt-2 px-3 flex-1 overflow-y-auto">
-        <ul className="space-y-0.5">
+      <nav className="mt-6 px-4 flex-1 overflow-y-auto">
+        <ul className="space-y-1">
           {navigation.map((item, index) => {
-            const isActive = pathname === item.href;
-            const isDanger = item.danger;
-            const showSeparator = index === navigation.length - 1 && isDanger;
+            const showSeparator = index === navigation.length - 1 && item.danger;
             
             return (
               <li key={item.name}>
                 {showSeparator && (
-                  <div className="border-t border-gray-200 my-4 pt-4">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">
-                      Zona Bahaya
+                  <div className="border-t border-gray-200 my-6 pt-4">
+                    <p className="text-xs font-semibold text-red-400 uppercase tracking-wider px-3 mb-3">
+                      🔴 Zona Bahaya
                     </p>
                   </div>
                 )}
-                <Link
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    isActive
-                      ? isDanger 
-                        ? 'bg-red-50 text-red-600 shadow-sm'
-                        : 'bg-emerald-50 text-emerald-700 shadow-sm'
-                      : isDanger
-                        ? 'text-red-600 hover:bg-red-50'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <item.icon className="w-4.5 h-4.5 flex-shrink-0" />
-                  <span className="truncate">{item.name}</span>
-                </Link>
+                <NavigationItem 
+                  item={item} 
+                  pathname={pathname} 
+                  onClick={closeMobileMenu}
+                />
               </li>
             );
           })}
         </ul>
       </nav>
 
-      {/* Logout Button */}
-      <div className="border-t border-gray-200 p-3">
+      {/* Logout Button dengan desain islami */}
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 p-4">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all w-full text-gray-600 hover:bg-red-50 hover:text-red-600"
-          suppressHydrationWarning
+          className="flex items-center gap-3 px-4 py-4 rounded-xl text-sm font-medium transition-all duration-200 w-full text-gray-600 hover:bg-red-50 hover:text-red-600 hover:shadow-sm border border-transparent hover:border-red-200 min-h-[44px] touch-manipulation gpu-accelerated"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-5 h-5 flex-shrink-0" />
           <span>Keluar</span>
+          <div className="ml-auto text-xs text-gray-400">⌨ Ctrl+Q</div>
         </button>
       </div>
     </>
@@ -134,7 +162,7 @@ export default function Sidebar() {
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-gray-600 hover:bg-emerald-100"
+            className="p-3 rounded-lg text-gray-600 hover:bg-emerald-100 min-h-[44px] min-w-[44px] touch-manipulation"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -161,4 +189,6 @@ export default function Sidebar() {
       </div>
     </>
   );
-}
+};
+
+export default Sidebar;
