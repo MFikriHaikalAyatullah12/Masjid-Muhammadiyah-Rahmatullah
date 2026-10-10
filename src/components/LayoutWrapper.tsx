@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { Suspense, useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
+import TopNav from './TopNav';
 import OptimizedLoader from './OptimizedLoader';
 
 const PUBLIC_PATHS = ['/', '/informasi', '/kontak', '/infaq'];
@@ -33,16 +33,16 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         <img src="/Muhammadiyah.jpeg" alt="" className="w-full h-full object-contain grayscale" loading="lazy" decoding="async" />
       </div>
       
-      <Sidebar />
+      <TopNav />
       
       {/* Instant loading overlay */}
       {isPageLoading && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center lg:pl-64">
+        <div className="fixed inset-0 top-16 bg-white/80 backdrop-blur-sm z-40 flex items-center justify-center">
           <OptimizedLoader />
         </div>
       )}
       
-      <main className="lg:pl-64 pt-16 lg:pt-0 relative z-10">
+      <main className="relative z-10">
         <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-7xl mx-auto">
           <Suspense fallback={<OptimizedLoader />}>
             <div className={`transition-opacity duration-200 ${isPageLoading ? 'opacity-50' : 'opacity-100'}`}>

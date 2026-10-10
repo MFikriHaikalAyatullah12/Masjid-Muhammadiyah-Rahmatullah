@@ -162,7 +162,7 @@ export default function InfaqForm() {
 
       <div>
         <label htmlFor={`${id}-nama`} className={label}>Nama lengkap <span className="text-rose-600" aria-hidden="true">*</span></label>
-        <input id={`${id}-nama`} name="nama" required minLength={2} maxLength={100} autoComplete="name" value={nama} onChange={e => setNama(e.target.value)} className={input} placeholder={kategori === 'infaq' ? "Nama Anda atau 'Hamba Allah'" : 'Nama sesuai data di masjid'} />
+        <input id={`${id}-nama`} name="nama" required minLength={2} maxLength={100} autoComplete="name" value={nama} onChange={e => setNama(e.target.value)} className={input} placeholder={kategori === 'infaq' ? "Nama Anda atau 'Hamba Allah'" : 'Nama sesuai data di masjid'} suppressHydrationWarning />
         {(kategori === 'donatur_bulanan' || kategori === 'tabungan_qurban') && (
           <p className="mt-1 text-xs text-slate-500">Gunakan nama/nomor WA yang sama seperti terdaftar agar setoran tersambung ke data Anda.</p>
         )}
@@ -171,7 +171,7 @@ export default function InfaqForm() {
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor={`${id}-telp`} className={label}>Nomor WhatsApp <span className="font-normal text-slate-500">(opsional)</span></label>
-          <input id={`${id}-telp`} name="telp" type="tel" inputMode="tel" autoComplete="tel" maxLength={20} value={telp} onChange={e => setTelp(e.target.value)} className={input} placeholder="08xxxxxxxxxx" />
+          <input id={`${id}-telp`} name="telp" type="tel" inputMode="tel" autoComplete="tel" maxLength={20} value={telp} onChange={e => setTelp(e.target.value)} className={input} placeholder="08xxxxxxxxxx" suppressHydrationWarning />
         </div>
         {kategori === 'infaq' && (
         <fieldset>
@@ -189,13 +189,13 @@ export default function InfaqForm() {
         {kategori === 'zakat_fitrah' && (
           <div>
             <label htmlFor={`${id}-jiwa`} className={label}>Jumlah jiwa <span className="text-rose-600" aria-hidden="true">*</span></label>
-            <input id={`${id}-jiwa`} type="number" inputMode="numeric" min={1} max={100} required value={jumlahJiwa} onChange={e => setJumlahJiwa(e.target.value)} className={input} />
+            <input id={`${id}-jiwa`} type="number" inputMode="numeric" min={1} max={100} required value={jumlahJiwa} onChange={e => setJumlahJiwa(e.target.value)} className={input} suppressHydrationWarning />
           </div>
         )}
         {kategori === 'zakat_mal' && (
           <div>
             <label htmlFor={`${id}-harta`} className={label}>Jenis harta <span className="text-rose-600" aria-hidden="true">*</span></label>
-            <select id={`${id}-harta`} value={jenisHarta} onChange={e => setJenisHarta(e.target.value as typeof jenisHarta)} className={`${input} capitalize`}>
+            <select id={`${id}-harta`} value={jenisHarta} onChange={e => setJenisHarta(e.target.value as typeof jenisHarta)} className={`${input} capitalize`} suppressHydrationWarning>
               {JENIS_HARTA.map(h => <option key={h} value={h}>{h}</option>)}
             </select>
           </div>
@@ -204,20 +204,20 @@ export default function InfaqForm() {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label htmlFor={`${id}-bulan`} className={label}>Bulan <span className="text-rose-600" aria-hidden="true">*</span></label>
-              <select id={`${id}-bulan`} value={bulan} onChange={e => setBulan(Number(e.target.value))} className={input}>
+              <select id={`${id}-bulan`} value={bulan} onChange={e => setBulan(Number(e.target.value))} className={input} suppressHydrationWarning>
                 {NAMA_BULAN.map((b, i) => <option key={b} value={i + 1}>{b}</option>)}
               </select>
             </div>
             <div>
               <label htmlFor={`${id}-tahun`} className={label}>Tahun</label>
-              <input id={`${id}-tahun`} type="number" min={2020} max={2100} value={tahun} onChange={e => setTahun(Number(e.target.value))} className={input} />
+              <input id={`${id}-tahun`} type="number" min={2020} max={2100} value={tahun} onChange={e => setTahun(Number(e.target.value))} className={input} suppressHydrationWarning />
             </div>
           </div>
         )}
         {kategori === 'tabungan_qurban' && (
           <div>
             <label htmlFor={`${id}-hewan`} className={label}>Hewan qurban <span className="text-rose-600" aria-hidden="true">*</span></label>
-            <select id={`${id}-hewan`} value={jenisHewan} onChange={e => setJenisHewan(e.target.value as typeof jenisHewan)} className={`${input} capitalize`}>
+            <select id={`${id}-hewan`} value={jenisHewan} onChange={e => setJenisHewan(e.target.value as typeof jenisHewan)} className={`${input} capitalize`} suppressHydrationWarning>
               {JENIS_HEWAN.map(h => <option key={h} value={h}>{h}</option>)}
             </select>
           </div>
@@ -227,30 +227,30 @@ export default function InfaqForm() {
       {kategori === 'zakat_mal' && (
         <div>
           <label htmlFor={`${id}-nilai`} className={label}>Total nilai harta (Rp) <span className="font-normal text-slate-500">(opsional)</span></label>
-          <input id={`${id}-nilai`} inputMode="numeric" value={nilaiHarta} onChange={e => setNilaiHarta(formatRupiah(e.target.value))} className={`${input} tabular-nums`} placeholder="contoh: 100.000.000" />
+          <input id={`${id}-nilai`} inputMode="numeric" value={nilaiHarta} onChange={e => setNilaiHarta(formatRupiah(e.target.value))} className={`${input} tabular-nums`} placeholder="contoh: 100.000.000" suppressHydrationWarning />
         </div>
       )}
       {kategori === 'tabungan_qurban' && (
         <div>
           <label htmlFor={`${id}-target`} className={label}>Target tabungan (Rp) <span className="font-normal text-slate-500">(isi jika baru pertama kali menabung)</span></label>
-          <input id={`${id}-target`} inputMode="numeric" value={targetTabungan} onChange={e => setTargetTabungan(formatRupiah(e.target.value))} className={`${input} tabular-nums`} placeholder="contoh: 3.500.000" />
+          <input id={`${id}-target`} inputMode="numeric" value={targetTabungan} onChange={e => setTargetTabungan(formatRupiah(e.target.value))} className={`${input} tabular-nums`} placeholder="contoh: 3.500.000" suppressHydrationWarning />
         </div>
       )}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor={`${id}-tanggal`} className={label}>Tanggal transfer <span className="text-rose-600" aria-hidden="true">*</span></label>
-          <input id={`${id}-tanggal`} name="tanggal" type="date" required max={today()} value={tanggal} onChange={e => setTanggal(e.target.value)} className={input} />
+          <input id={`${id}-tanggal`} name="tanggal" type="date" required max={today()} value={tanggal} onChange={e => setTanggal(e.target.value)} className={input} suppressHydrationWarning />
         </div>
         <div>
           <label htmlFor={`${id}-nominal`} className={label}>{kategori === 'zakat_fitrah' ? 'Total dibayar (Rp)' : 'Nominal (Rp)'} <span className="text-rose-600" aria-hidden="true">*</span></label>
-          <input id={`${id}-nominal`} name="nominal" inputMode="numeric" required value={nominal} onChange={e => setNominal(formatRupiah(e.target.value))} className={`${input} tabular-nums`} placeholder="contoh: 100.000" />
+          <input id={`${id}-nominal`} name="nominal" inputMode="numeric" required value={nominal} onChange={e => setNominal(formatRupiah(e.target.value))} className={`${input} tabular-nums`} placeholder="contoh: 100.000" suppressHydrationWarning />
         </div>
       </div>
 
       <div>
         <label htmlFor={`${id}-catatan`} className={label}>Catatan / doa <span className="font-normal text-slate-500">(opsional)</span></label>
-        <textarea id={`${id}-catatan`} name="catatan" rows={2} maxLength={500} value={catatan} onChange={e => setCatatan(e.target.value)} className={input} placeholder="Misal: untuk pembangunan tempat wudhu" />
+        <textarea id={`${id}-catatan`} name="catatan" rows={2} maxLength={500} value={catatan} onChange={e => setCatatan(e.target.value)} className={input} placeholder="Misal: untuk pembangunan tempat wudhu" suppressHydrationWarning />
       </div>
 
       <div>
@@ -312,6 +312,7 @@ export default function InfaqForm() {
         type="submit"
         disabled={submitting || compressing}
         className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-6 py-3.5 font-semibold text-white min-h-[52px] shadow-sm hover:bg-emerald-800 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
+        suppressHydrationWarning
       >
         {submitting ? <><Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> Mengirim…</> : 'Kirim Konfirmasi'}
       </button>
