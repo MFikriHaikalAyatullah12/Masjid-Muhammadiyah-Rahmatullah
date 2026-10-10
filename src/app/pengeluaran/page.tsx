@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrendingDown, Plus, CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 
 interface Pengeluaran {
   id: number;
@@ -214,22 +215,20 @@ export default function PengeluaranPage() {
   return (
     <div className="space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 md:gap-3 mb-2">
-            <TrendingDown className="w-6 h-6 md:w-8 md:h-8 text-red-600" />
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Pengeluaran</h1>
-          </div>
-          <p className="text-sm md:text-base text-gray-600">Kelola pengajuan dan persetujuan pengeluaran</p>
-        </div>
-        <button 
-          onClick={() => setShowForm(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm md:text-base min-h-[44px]"
-        >
-          <Plus className="w-4 h-4 md:w-5 md:h-5" />
-          Tambah Pengeluaran
-        </button>
-      </div>
+      <PageHeader
+        title="Pengeluaran"
+        description="Kelola pengajuan dan persetujuan pengeluaran"
+        icon={<TrendingDown className="w-5 h-5" />}
+        actions={
+          <button 
+            onClick={() => setShowForm(true)}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-semibold text-sm min-h-[44px] shadow-sm"
+          >
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Tambah Pengeluaran
+          </button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

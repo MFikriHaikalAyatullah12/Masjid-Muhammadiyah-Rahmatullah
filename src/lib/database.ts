@@ -193,14 +193,22 @@ export async function createZakatMal(data: Omit<ZakatMal, 'id'>, userId?: number
       [data.nama_muzakki, data.jenis_harta, data.nilai_harta, data.nisab, data.jumlah_zakat, data.tanggal_bayar, data.tahun_hijriah || new Date().getFullYear().toString(), data.keterangan, userId]
     );
     
-    // Update kas harian
-    const currentSaldo = await getCurrentSaldo();
+    // Update kas harian (per akun admin)
+    const saldoRes = await client.query(
+      userId
+        ? 'SELECT saldo_sesudah FROM kas_harian WHERE user_id = $1 ORDER BY tanggal DESC, created_at DESC LIMIT 1'
+        : 'SELECT saldo_sesudah FROM kas_harian ORDER BY tanggal DESC, created_at DESC LIMIT 1',
+      userId ? [userId] : []
+    );
+    const currentSaldo = saldoRes.rows.length ? parseFloat(saldoRes.rows[0].saldo_sesudah) || 0 : 0;
     const newSaldo = currentSaldo + data.jumlah_zakat;
     
-    await client.query(
-      'INSERT INTO kas_harian (tanggal, jenis_transaksi, kategori, deskripsi, jumlah, saldo_sebelum, saldo_sesudah, petugas) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-      [data.tanggal_bayar, 'masuk', 'zakat_mal', `Zakat Mal dari ${data.nama_muzakki}`, data.jumlah_zakat, currentSaldo, newSaldo, 'Admin']
-    );
+    if (data.jumlah_zakat > 0) {
+      await client.query(
+        'INSERT INTO kas_harian (tanggal, jenis_transaksi, kategori, deskripsi, jumlah, saldo_sebelum, saldo_sesudah, petugas, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())',
+        [data.tanggal_bayar, 'masuk', 'zakat_mal', `Zakat Mal dari ${data.nama_muzakki}`, data.jumlah_zakat, currentSaldo, newSaldo, 'Admin', userId ?? null]
+      );
+    }
     
     await client.query('COMMIT');
     return zakatResult.rows[0];

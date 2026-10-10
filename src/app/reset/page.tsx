@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { AlertTriangle, Database, Trash2, Shield } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import Alert from '@/components/Alert';
 
 export default function ResetPage() {
@@ -55,20 +56,18 @@ export default function ResetPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Database className="w-8 h-8 text-red-600" />
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reset Database</h1>
-          <p className="text-gray-600">Hapus semua data dari sistem</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Reset Database"
+        description="Hapus semua data dari sistem"
+        icon={<Database className="w-5 h-5" />}
+      />
 
       {/* Warning Card */}
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
         <div className="flex items-start gap-4">
-          <AlertTriangle className="w-8 h-8 text-red-600 flex-shrink-0 mt-1" />
+          <AlertTriangle className="w-8 h-8 text-red-600 flex-shrink-0 mt-1" aria-hidden="true" />
           <div>
-            <h2 className="text-xl font-bold text-red-900 mb-2">⚠️ PERINGATAN PENTING</h2>
+            <h2 className="text-xl font-bold text-red-900 mb-2">Peringatan Penting</h2>
             <div className="text-red-800 space-y-2">
               <p className="font-semibold">Tindakan ini akan menghapus SEMUA data secara permanen:</p>
               <ul className="list-disc list-inside space-y-1 ml-4">

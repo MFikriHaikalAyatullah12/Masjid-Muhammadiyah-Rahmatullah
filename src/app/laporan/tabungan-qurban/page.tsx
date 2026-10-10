@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import { Download, Calendar, Users, TrendingUp, Banknote, FileDown } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import LoadingEnhanced from '@/components/LoadingEnhanced';
 
 interface TabunganSummary {
@@ -102,28 +103,21 @@ export default function LaporanTabunganQurban() {
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 lg:p-6 border border-emerald-200">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-          <div className="flex-1">
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">📈 Laporan Tabungan Qurban</h1>
-            <p className="text-sm lg:text-base text-gray-600">Laporan lengkap semua data tabungan qurban saat ini</p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <span className="text-xs lg:text-sm text-emerald-600 font-medium flex items-center gap-2">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              Data Realtime
-            </span>
-            <button
-              onClick={downloadPDF}
-              className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base min-h-[44px]"
-              disabled={loading}
-            >
-              <FileDown className="w-4 h-4" />
-              Download PDF
-            </button>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Laporan Tabungan Qurban"
+        description="Laporan lengkap semua data tabungan qurban saat ini"
+        icon={<TrendingUp className="w-5 h-5" />}
+        actions={
+          <button
+            onClick={downloadPDF}
+            className="inline-flex items-center justify-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors font-semibold text-sm min-h-[44px] shadow-sm"
+            disabled={loading}
+          >
+            <FileDown className="w-4 h-4" aria-hidden="true" />
+            Download PDF
+          </button>
+        }
+      />
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4">

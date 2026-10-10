@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { FileText, Download, Calendar, DollarSign, Users, TrendingUp } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import Loading from '@/components/Loading';
 
 interface LaporanData {
@@ -107,28 +108,22 @@ export default function LaporanPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-emerald-100 p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-3 bg-emerald-100 rounded-xl">
-              <FileText className="h-7 w-7 text-emerald-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Laporan Keuangan</h1>
-              <p className="text-gray-600 text-sm">Laporan lengkap pengelolaan zakat dan kas masjid</p>
-            </div>
-          </div>
+      <PageHeader
+        title="Laporan Keuangan"
+        description="Laporan lengkap pengelolaan zakat dan kas masjid"
+        icon={<FileText className="w-5 h-5" />}
+        actions={
           <button
             onClick={handleDownloadPDF}
-            className="flex items-center justify-center space-x-2 bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 transition-all shadow-md hover:shadow-lg"
+            className="inline-flex items-center justify-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors font-semibold text-sm min-h-[44px] shadow-sm"
           >
-            <Download size={20} />
-            <span className="font-medium">Download PDF</span>
+            <Download className="w-4 h-4" aria-hidden="true" />
+            <span>Download PDF</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter Periode */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-emerald-100 p-6">

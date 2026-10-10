@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles, Plus, Search, DollarSign, TrendingUp, Target, Trash2 } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import Alert from '@/components/Alert';
 import Modal from '@/components/Modal';
 import Loading from '@/components/Loading';
@@ -241,22 +242,20 @@ export default function TabunganQurbanPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            <Sparkles className="w-7 h-7 text-purple-600" />
-            Tabungan Qurban
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">Kelola tabungan hewan qurban dengan sistem cicilan</p>
-        </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="btn btn-primary inline-flex items-center justify-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Buat Tabungan
-        </button>
-      </div>
+      <PageHeader
+        title="Tabungan Qurban"
+        description="Kelola tabungan hewan qurban dengan sistem cicilan"
+        icon={<Sparkles className="w-5 h-5" />}
+        actions={
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn btn-primary"
+          >
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Buat Tabungan
+          </button>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

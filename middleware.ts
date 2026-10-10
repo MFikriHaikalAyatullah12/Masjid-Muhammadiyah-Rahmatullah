@@ -14,9 +14,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Public routes
-  const publicRoutes = ['/login'];
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  // Pendaftaran publik dinonaktifkan: hanya satu akun admin yang dipakai
+  if (pathname === '/register') {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // Laman publik (tanpa login) + halaman login
+  const publicRoutes = ['/', '/informasi', '/kontak', '/infaq', '/login'];
+  const isPublicRoute = publicRoutes.some(route =>
+    route === '/' ? pathname === '/' : pathname === route || pathname.startsWith(route + '/')
+  );
 
   if (isPublicRoute) {
     return NextResponse.next();

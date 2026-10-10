@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Wallet, Plus, Calculator, Trash2 } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { formatRupiah, parseRupiah, handleCurrencyChange, displayRupiah } from '@/lib/currency';
 
 interface ZakatMal {
@@ -207,31 +208,29 @@ export default function ZakatMalPage() {
   return (
     <div className="space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 md:gap-3 mb-2">
-            <Wallet className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Zakat Mal</h1>
-          </div>
-          <p className="text-sm md:text-base text-gray-600">Kelola penerimaan zakat mal (zakat harta)</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+      <PageHeader
+        title="Zakat Mal"
+        description="Kelola penerimaan zakat mal (zakat harta)"
+        icon={<Wallet className="w-5 h-5" />}
+        actions={
+          <>
           <button 
             onClick={() => setShowCalculator(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base min-h-[44px]"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-slate-700 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 transition-colors font-medium text-sm min-h-[44px]"
           >
-            <Calculator className="w-4 h-4 md:w-5 md:h-5" />
+            <Calculator className="w-4 h-4" aria-hidden="true" />
             Kalkulator
           </button>
           <button 
             onClick={() => setShowForm(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm md:text-base min-h-[44px]"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-semibold text-sm min-h-[44px] shadow-sm"
           >
-            <Plus className="w-4 h-4 md:w-5 md:h-5" />
+            <Plus className="w-4 h-4" aria-hidden="true" />
             Tambah Zakat Mal
           </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
           {/* Calculator Modal */}
           {showCalculator && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Heart, Plus, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import Modal from '@/components/Modal';
 
 interface ZakatFitrah {
@@ -276,23 +277,21 @@ export default function ZakatFitrahPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 md:gap-3 mb-2">
-            <Heart className="w-6 h-6 md:w-8 md:h-8 text-emerald-600" />
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Zakat Fitrah</h1>
-          </div>
-          <p className="text-sm md:text-base text-gray-600">Kelola penerimaan zakat fitrah</p>
-        </div>
-        <button 
-          onClick={() => setShowForm(true)}
-          disabled={saving}
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm md:text-base min-h-[48px] shadow-sm"
-        >
-          <Plus className="w-4 h-4 md:w-5 md:h-5" />
-          Tambah Zakat Fitrah
-        </button>
-      </div>
+      <PageHeader
+        title="Zakat Fitrah"
+        description="Kelola penerimaan zakat fitrah"
+        icon={<Heart className="w-5 h-5" />}
+        actions={
+          <button 
+            onClick={() => setShowForm(true)}
+            disabled={saving}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold text-sm min-h-[44px] shadow-sm"
+          >
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Tambah Zakat Fitrah
+          </button>
+        }
+      />
 
       {/* Mobile Cards View */}
       <div className="block lg:hidden space-y-4">

@@ -48,7 +48,7 @@ export default function LoginPage() {
         console.log('Login successful, redirecting to dashboard...');
         // Add a small delay to ensure cookie is set
         setTimeout(() => {
-          window.location.href = '/';
+          window.location.href = '/dashboard';
         }, 200);
       } else {
         setError(data.error || 'Login gagal');
@@ -261,7 +261,8 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-emerald-100">
-          {/* Toggle */}
+          {/* Pendaftaran publik dinonaktifkan; aktifkan via NEXT_PUBLIC_ALLOW_REGISTRATION=true */}
+          {process.env.NEXT_PUBLIC_ALLOW_REGISTRATION === 'true' && (
           <div className="flex gap-4 mb-6">
             <button
               onClick={() => {
@@ -292,6 +293,7 @@ export default function LoginPage() {
               Daftar
             </button>
           </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">

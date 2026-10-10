@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Plus, Edit, Trash2, Search } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import Modal from '@/components/Modal';
 import Alert from '@/components/Alert';
 import Loading from '@/components/Loading';
@@ -174,30 +175,24 @@ export default function MustahiqPage() {
       )}
 
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Users className="h-6 w-6 text-purple-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Data Mustahiq</h1>
-              <p className="text-gray-600">Kelola data penerima zakat</p>
-            </div>
-          </div>
+      <PageHeader
+        title="Data Mustahiq"
+        description="Kelola data penerima zakat"
+        icon={<Users className="w-5 h-5" />}
+        actions={
           <button
             onClick={() => {
               setEditingMustahiq(null);
               resetForm();
               setShowModal(true);
             }}
-            className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors font-semibold text-sm min-h-[44px] shadow-sm"
           >
-            <Plus size={20} />
+            <Plus className="w-4 h-4" aria-hidden="true" />
             <span>Tambah Mustahiq</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter dan Search */}
       <div className="bg-white rounded-lg shadow-sm border p-6">

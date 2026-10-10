@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Banknote, Plus, Download, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 
 interface KasHarian {
   id: number;
@@ -299,28 +300,26 @@ export default function KasHarianPage() {
   return (
     <div className="space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 md:gap-3 mb-2">
-            <Banknote className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Kas Harian</h1>
-          </div>
-          <p className="text-sm md:text-base text-gray-600">Kelola pemasukan dan pengeluaran kas harian</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm md:text-base min-h-[44px]">
-            <Download className="w-4 h-4 md:w-5 md:h-5" />
-            Export
-          </button>
-          <button 
-            onClick={() => setShowForm(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm md:text-base min-h-[44px]"
-          >
-            <Plus className="w-4 h-4 md:w-5 md:h-5" />
-            Tambah Transaksi
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Kas Harian"
+        description="Kelola pemasukan dan pengeluaran kas harian"
+        icon={<Banknote className="w-5 h-5" />}
+        actions={
+          <>
+            <button className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-slate-700 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 transition-colors font-medium text-sm min-h-[44px]">
+              <Download className="w-4 h-4" aria-hidden="true" />
+              Export
+            </button>
+            <button 
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-semibold text-sm min-h-[44px] shadow-sm"
+            >
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Tambah Transaksi
+            </button>
+          </>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">

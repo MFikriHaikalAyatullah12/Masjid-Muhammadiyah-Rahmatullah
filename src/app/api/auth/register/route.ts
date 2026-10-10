@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
+// Pendaftaran publik ditutup; aktifkan dengan ALLOW_REGISTRATION=true bila perlu membuat akun admin baru.
 export async function POST(request: NextRequest) {
+  if (process.env.ALLOW_REGISTRATION !== 'true') {
+    return NextResponse.json({
+      success: false,
+      error: 'Pendaftaran akun tidak dibuka untuk umum. Hubungi admin masjid.'
+    }, { status: 403 });
+  }
   try {
     const { email, password, nama } = await request.json();
 

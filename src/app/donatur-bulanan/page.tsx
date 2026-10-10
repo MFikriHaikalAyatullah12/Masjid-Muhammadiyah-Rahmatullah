@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CalendarHeart, Plus, Search, Edit, Trash2, DollarSign, Calendar } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import Alert from '@/components/Alert';
 import Modal from '@/components/Modal';
 import Loading from '@/components/Loading';
@@ -225,22 +226,20 @@ export default function DonaturBulananPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            <CalendarHeart className="w-7 h-7 text-emerald-600" />
-            Donatur Bulanan
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">Kelola donatur yang menyumbang setiap bulan</p>
-        </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="btn btn-primary inline-flex items-center justify-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Tambah Donatur
-        </button>
-      </div>
+      <PageHeader
+        title="Donatur Bulanan"
+        description="Kelola donatur yang menyumbang setiap bulan"
+        icon={<CalendarHeart className="w-5 h-5" />}
+        actions={
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn btn-primary"
+          >
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Tambah Donatur
+          </button>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -8,6 +8,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await requireAuth();
     const { id: idParam } = await params;
     const id = parseInt(idParam);
     
@@ -49,17 +50,18 @@ export async function PATCH(
 
       const pengeluaran = result.rows[0];
 
-      // Jika status berubah menjadi 'disetujui', tambahkan ke kas_harian
-      if (status === 'disetujui') {
-        // Get current saldo
-        const saldoResult = await client.query(`
-          SELECT COALESCE(
-            (SELECT saldo_sesudah FROM kas_harian ORDER BY created_at DESC, id DESC LIMIT 1), 
-            0
-          ) as current_saldo
-        `);
+      // Jika status berubah menjadi 'disetujui', tambahkan ke kas_harian (sekali saja)
+      const sudahDicatat = await client.query(
+        `SELECT 1 FROM kas_harian WHERE bukti_transaksi = $1 LIMIT 1`,
+        [`pengeluaran:${id}`]
+      );
+      if (status === 'disetujui' && sudahDicatat.rows.length === 0) {
+        const saldoResult = await client.query(
+          'SELECT saldo_sesudah FROM kas_harian WHERE user_id = $1 ORDER BY tanggal DESC, created_at DESC LIMIT 1',
+          [user.userId]
+        );
         
-        const currentSaldo = parseFloat(saldoResult.rows[0].current_saldo) || 0;
+        const currentSaldo = saldoResult.rows.length ? parseFloat(saldoResult.rows[0].saldo_sesudah) || 0 : 0;
         const jumlahPengeluaran = parseFloat(pengeluaran.jumlah);
         const saldoBaru = currentSaldo - jumlahPengeluaran;
 
@@ -73,8 +75,12 @@ export async function PATCH(
             jumlah, 
             saldo_sebelum, 
             saldo_sesudah, 
-            petugas
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            petugas,
+            bukti_transaksi,
+            user_id,
+            created_at,
+            updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
         `, [
           pengeluaran.tanggal,
           'keluar',
@@ -83,7 +89,9 @@ export async function PATCH(
           jumlahPengeluaran,
           currentSaldo,
           saldoBaru,
-          pengeluaran.disetujui_oleh || 'Admin'
+          pengeluaran.disetujui_oleh || user.nama || 'Admin',
+          `pengeluaran:${id}`,
+          user.userId
         ]);
       }
 

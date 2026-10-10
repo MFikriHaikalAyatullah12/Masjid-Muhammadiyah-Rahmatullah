@@ -17,7 +17,11 @@ import {
   Sparkles,
   LogOut,
   HandHeart,
-  Coins
+  Coins,
+  Inbox,
+  Globe,
+  Settings,
+  HandCoins
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -28,7 +32,9 @@ interface NavigationItem {
 }
 
 const navigation: NavigationItem[] = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Infaq Online', href: '/infaq-online', icon: Inbox },
+  { name: 'Infaq & Sedekah', href: '/data-infaq', icon: HandCoins },
   { name: 'Zakat Fitrah', href: '/zakat-fitrah', icon: Heart },
   { name: 'Zakat Mal', href: '/zakat-mal', icon: Coins },
   { name: 'Donatur Bulanan', href: '/donatur-bulanan', icon: HandHeart },
@@ -38,6 +44,7 @@ const navigation: NavigationItem[] = [
   { name: 'Mustahiq', href: '/mustahiq', icon: Users },
   { name: 'Laporan', href: '/laporan', icon: FileText },
   { name: 'Laporan Tabungan', href: '/laporan/tabungan-qurban', icon: CalendarHeart },
+  { name: 'Pengaturan Website', href: '/pengaturan-website', icon: Settings },
   { name: 'Reset Database', href: '/reset', icon: Database, danger: true },
 ];
 
@@ -61,23 +68,21 @@ const NavigationItem = memo(({ item, pathname, onClick, onNavigate }: {
     <Link
       href={item.href}
       onClick={handleClick}
-      className={`flex items-center gap-3 px-4 py-4 rounded-xl text-sm font-medium transition-all duration-150 min-h-[44px] touch-manipulation will-change-transform ${
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 min-h-[44px] touch-manipulation ${
         isActive
           ? isDanger 
-            ? 'bg-red-50 text-red-600 shadow-sm border-l-4 border-red-500'
-            : 'bg-teal-50 text-teal-700 shadow-sm border-l-4 border-teal-500'
+            ? 'bg-rose-50 text-rose-700'
+            : 'bg-emerald-50 text-emerald-800'
           : isDanger
-            ? 'text-red-600 hover:bg-red-50 hover:shadow-sm'
-            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm'
+            ? 'text-rose-600 hover:bg-rose-50'
+            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
       }`}
+      aria-current={isActive ? 'page' : undefined}
       prefetch={true}
       replace={false}
     >
-      <IconComponent className="w-5 h-5 flex-shrink-0" />
+      <IconComponent className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
       <span className="truncate">{item.name}</span>
-      {isActive && !isDanger && (
-        <div className="w-2 h-2 bg-teal-400 rounded-full ml-auto" />
-      )}
     </Link>
   );
 });
@@ -116,29 +121,25 @@ const Sidebar = () => {
 
   const SidebarContent = () => (
     <>
-      <div className="relative">
-        {/* Header dengan gradient islami */}
-        <div className="bg-gradient-to-r from-teal-600 to-emerald-600 p-4">
-          <div className="text-center">
-            <h1 className="text-white font-bold text-base leading-tight mb-1">Sistem Administrasi</h1>
-            <h2 className="text-white font-bold text-base leading-tight mb-2">Masjid</h2>
-            <div className="h-px bg-white/30 my-3" />
-            <p className="text-white/70 text-xs italic">Masjid Muhammadiyah Rahmatullah</p>
-          </div>
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-200">
+        <img src="/Muhammadiyah.jpeg" alt="" width={40} height={40} className="h-10 w-10 rounded-full object-cover ring-2 ring-emerald-100" />
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-slate-900 leading-tight truncate">Masjid Muhammadiyah Rahmatullah</p>
+          <p className="text-xs text-slate-500">Panel Administrasi</p>
         </div>
       </div>
       
-      <nav className="mt-6 px-4 flex-1 overflow-y-auto">
-        <ul className="space-y-1">
+      <nav className="mt-4 px-3 flex-1 overflow-y-auto" aria-label="Menu admin">
+        <ul className="space-y-0.5">
           {navigation.map((item, index) => {
             const showSeparator = index === navigation.length - 1 && item.danger;
             
             return (
               <li key={item.name}>
                 {showSeparator && (
-                  <div className="border-t border-gray-200 my-6 pt-4">
-                    <p className="text-xs font-semibold text-red-400 uppercase tracking-wider px-3 mb-3">
-                      🔴 Zona Bahaya
+                  <div className="border-t border-slate-200 my-4 pt-3">
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">
+                      Zona Bahaya
                     </p>
                   </div>
                 )}
@@ -154,15 +155,22 @@ const Sidebar = () => {
         </ul>
       </nav>
 
-      {/* Logout Button dengan desain islami */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 p-4">
+      <div className="border-t border-slate-200 p-3 space-y-1">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-emerald-700 hover:bg-emerald-50 min-h-[44px] touch-manipulation transition-colors duration-150"
+        >
+          <Globe className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+          <span>Lihat Website Publik</span>
+        </a>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-4 rounded-xl text-sm font-medium transition-all duration-200 w-full text-gray-600 hover:bg-red-50 hover:text-red-600 hover:shadow-sm border border-transparent hover:border-red-200 min-h-[44px] touch-manipulation gpu-accelerated"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 w-full text-slate-600 hover:bg-rose-50 hover:text-rose-700 min-h-[44px] touch-manipulation"
         >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
+          <LogOut className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
           <span>Keluar</span>
-          <div className="ml-auto text-xs text-gray-400">⌨ Ctrl+Q</div>
         </button>
       </div>
     </>
@@ -171,15 +179,17 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200 px-4 py-3">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Building className="w-6 h-6 text-emerald-600" />
-            <span className="text-lg font-bold text-gray-900">Zakat Masjid</span>
+            <img src="/Muhammadiyah.jpeg" alt="" width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+            <span className="text-base font-semibold text-slate-900">Admin Masjid</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-3 rounded-lg text-gray-600 hover:bg-emerald-100 min-h-[44px] min-w-[44px] touch-manipulation"
+            aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
+            aria-expanded={mobileMenuOpen}
+            className="p-3 rounded-lg text-slate-600 hover:bg-slate-100 min-h-[44px] min-w-[44px] touch-manipulation"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -192,7 +202,7 @@ const Sidebar = () => {
       )}
 
       {/* Mobile Sidebar */}
-      <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-emerald-50 to-teal-50 shadow-xl transform transition-transform duration-300 ease-in-out ${
+      <div className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
@@ -201,7 +211,7 @@ const Sidebar = () => {
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:bg-gradient-to-b lg:from-emerald-50 lg:to-teal-50 lg:border-r lg:border-emerald-200 lg:flex lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:bg-white lg:border-r lg:border-slate-200 lg:flex lg:flex-col">
         <SidebarContent />
       </div>
     </>
