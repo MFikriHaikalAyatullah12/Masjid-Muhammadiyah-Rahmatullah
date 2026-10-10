@@ -15,7 +15,8 @@ function getSecretKey(): Uint8Array {
 
 export interface UserPayload {
   userId: number;
-  email: string;
+  username?: string;
+  email?: string;
   nama: string;
   role: string;
 }
@@ -33,7 +34,8 @@ export async function getUserFromToken(): Promise<UserPayload | null> {
     
     return {
       userId: payload.userId as number,
-      email: payload.email as string,
+      username: payload.username as string | undefined,
+      email: payload.email as string | undefined,
       nama: payload.nama as string,
       role: payload.role as string
     };

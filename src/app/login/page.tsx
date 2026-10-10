@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Lock, User, Eye, EyeOff, ShieldCheck, Loader2, AlertCircle, CheckCircle2, Landmark } from 'lucide-react';
+import { Lock, User, AtSign, Eye, EyeOff, ShieldCheck, Loader2, AlertCircle, CheckCircle2, Landmark } from 'lucide-react';
 
 const inputClass =
   'w-full h-12 pl-11 pr-4 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder:text-slate-400 ' +
@@ -30,13 +30,13 @@ export default function LoginPage() {
   const allowRegistration = process.env.NEXT_PUBLIC_ALLOW_REGISTRATION === 'true';
 
   const [loginData, setLoginData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
 
   const [registerData, setRegisterData] = useState({
     nama: '',
-    email: '',
+    username: '',
     password: '',
     confirmPassword: ''
   });
@@ -102,7 +102,7 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nama: registerData.nama,
-          email: registerData.email,
+          username: registerData.username,
           password: registerData.password
         })
       });
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
       if (data.success) {
         setIsLogin(true);
-        setRegisterData({ nama: '', email: '', password: '', confirmPassword: '' });
+        setRegisterData({ nama: '', username: '', password: '', confirmPassword: '' });
         setSuccess('Pendaftaran berhasil. Silakan masuk dengan akun Anda.');
       } else {
         setError(data.error || 'Pendaftaran gagal');
@@ -199,7 +199,7 @@ export default function LoginPage() {
               </h1>
               <p className="mt-2 text-slate-600">
                 {isLogin
-                  ? 'Gunakan email dan password yang terdaftar untuk melanjutkan.'
+                  ? 'Gunakan username dan password yang terdaftar untuk melanjutkan.'
                   : 'Lengkapi data berikut untuk mendaftar sebagai pengurus.'}
               </p>
             </div>
@@ -245,22 +245,23 @@ export default function LoginPage() {
             {isLogin ? (
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
-                  <label htmlFor="login-email" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Email
+                  <label htmlFor="login-username" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Username
                   </label>
                   <div className="relative">
-                    <Mail className={iconClass} aria-hidden="true" />
+                    <AtSign className={iconClass} aria-hidden="true" />
                     <input
-                      id="login-email"
-                      type="email"
+                      id="login-username"
+                      type="text"
                       required
-                      autoComplete="email"
-                      inputMode="email"
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       disabled={loading}
-                      value={loginData.email}
-                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      value={loginData.username}
+                      onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
                       className={inputClass}
-                      placeholder="nama@masjid.id"
+                      placeholder="Masukkan username"
                       suppressHydrationWarning
                     />
                   </div>
@@ -325,22 +326,27 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="reg-email" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Email
+                  <label htmlFor="reg-username" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Username
                   </label>
                   <div className="relative">
-                    <Mail className={iconClass} aria-hidden="true" />
+                    <AtSign className={iconClass} aria-hidden="true" />
                     <input
-                      id="reg-email"
-                      type="email"
+                      id="reg-username"
+                      type="text"
                       required
-                      autoComplete="email"
-                      inputMode="email"
+                      minLength={3}
+                      maxLength={50}
+                      pattern="[a-zA-Z0-9._-]+"
+                      title="Hanya huruf, angka, titik, strip, atau underscore"
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       disabled={loading}
-                      value={registerData.email}
-                      onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                      value={registerData.username}
+                      onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
                       className={inputClass}
-                      placeholder="nama@masjid.id"
+                      placeholder="contoh: bendahara"
                       suppressHydrationWarning
                     />
                   </div>

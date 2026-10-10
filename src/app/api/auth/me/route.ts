@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         userId: payload.userId,
+        username: payload.username,
         email: payload.email,
         nama: payload.nama,
         role: payload.role

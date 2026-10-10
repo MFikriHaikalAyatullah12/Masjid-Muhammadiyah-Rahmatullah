@@ -10,25 +10,27 @@ const SECRET_KEY = new TextEncoder().encode(
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    const username = String(body.username ?? body.email ?? '').trim();
+    const password = body.password;
 
-    if (!email || !password) {
+    if (!username || !password) {
       return NextResponse.json({
         success: false,
-        error: 'Email dan password harus diisi'
+        error: 'Username dan password harus diisi'
       }, { status: 400 });
     }
 
-    // Cari user berdasarkan email
+    // Cari user berdasarkan username (email lama tetap diterima)
     const result = await pool.query(
-      'SELECT id, email, password, nama, role FROM users WHERE email = $1',
-      [email]
+      'SELECT id, username, email, password, nama, role FROM users WHERE LOWER(username) = LOWER($1) OR LOWER(email) = LOWER($1)',
+      [username]
     );
 
     if (result.rows.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'Email atau password salah'
+        error: 'Username atau password salah'
       }, { status: 401 });
     }
 
@@ -40,13 +42,14 @@ export async function POST(request: NextRequest) {
     if (!isPasswordValid) {
       return NextResponse.json({
         success: false,
-        error: 'Email atau password salah'
+        error: 'Username atau password salah'
       }, { status: 401 });
     }
 
     // Create JWT token
     const token = await new SignJWT({
       userId: user.id,
+      username: user.username,
       email: user.email,
       nama: user.nama,
       role: user.role
@@ -81,6 +84,7 @@ export async function POST(request: NextRequest) {
       message: 'Login berhasil',
       data: {
         id: user.id,
+        username: user.username,
         email: user.email,
         nama: user.nama,
         role: user.role

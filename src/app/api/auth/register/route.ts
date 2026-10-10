@@ -11,25 +11,34 @@ export async function POST(request: NextRequest) {
     }, { status: 403 });
   }
   try {
-    const { email, password, nama } = await request.json();
+    const body = await request.json();
+    const username = String(body.username ?? '').trim().toLowerCase();
+    const { password, nama } = body;
 
-    if (!email || !password || !nama) {
+    if (!username || !password || !nama) {
       return NextResponse.json({
         success: false,
-        error: 'Email, password, dan nama harus diisi'
+        error: 'Username, password, dan nama harus diisi'
       }, { status: 400 });
     }
 
-    // Cek apakah email sudah terdaftar
+    if (!/^[a-z0-9._-]{3,50}$/.test(username)) {
+      return NextResponse.json({
+        success: false,
+        error: 'Username 3-50 karakter, hanya huruf, angka, titik, strip, atau underscore'
+      }, { status: 400 });
+    }
+
+    // Cek apakah username sudah terdaftar
     const checkUser = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
-      [email]
+      'SELECT id FROM users WHERE LOWER(username) = $1',
+      [username]
     );
 
     if (checkUser.rows.length > 0) {
       return NextResponse.json({
         success: false,
-        error: 'Email sudah terdaftar'
+        error: 'Username sudah terdaftar'
       }, { status: 400 });
     }
 
@@ -38,10 +47,10 @@ export async function POST(request: NextRequest) {
 
     // Insert user baru
     const result = await pool.query(
-      `INSERT INTO users (email, password, nama, role)
+      `INSERT INTO users (username, password, nama, role)
        VALUES ($1, $2, $3, 'user')
-       RETURNING id, email, nama, role, created_at`,
-      [email, hashedPassword, nama]
+       RETURNING id, username, nama, role, created_at`,
+      [username, hashedPassword, nama]
     );
 
     return NextResponse.json({
